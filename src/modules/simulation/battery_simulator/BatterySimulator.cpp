@@ -92,9 +92,11 @@ void BatterySimulator::Run()
 		_last_integration_us = now_us;
 
 	} else {
-		_battery_percentage = 1.f;
+		_battery_percentage = _param_bat_min_pct.get() / 100.f;
 		_last_integration_us = 0;
 	}
+
+	_battery_percentage = _param_bat_min_pct.get() / 100.f;
 
 	float ibatt = -1.0f; // no current sensor in simulation
 
