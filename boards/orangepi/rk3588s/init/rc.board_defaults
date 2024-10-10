@@ -22,3 +22,10 @@ param set-default COM_FLTMODE5 8
 param set-default COM_FLTMODE6 8
 
 param set-default SDLOG_MODE 2
+
+param set-default CBRK_SUPPLY_CHK 894281
+
+param set-default SYS_AUTOCONFIG 0
+param set-default SYS_AUTOSTART 4001
+
+param set-default MAV_TYPE 2
