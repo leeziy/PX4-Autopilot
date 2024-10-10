@@ -3,10 +3,10 @@
 # board specific defaults
 #------------------------------------------------------------------------------
 
-param set-default SYS_HAS_GPS 0
 param set-default SYS_AUTOCONFIG 0
 param set-default SYS_AUTOSTART 4001
 param set-default MAV_TYPE 2
+param set-default SYS_HAS_GPS 0
 
 param set-default BAT1_V_DIV 5.7
 param set-default BAT1_N_CELLS 3
