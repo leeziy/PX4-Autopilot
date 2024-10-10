@@ -5,3 +5,10 @@
 
 # 1K + 4.7K
 param set-default BAT1_V_DIV 5.7
+param set-default COM_FLTMODE1 0
+param set-default COM_FLTMODE2 0
+param set-default COM_FLTMODE3 0
+param set-default COM_FLTMODE4 0
+param set-default COM_FLTMODE5 0
+param set-default COM_FLTMODE6 0
+param set-default SDLOG_MODE 0
