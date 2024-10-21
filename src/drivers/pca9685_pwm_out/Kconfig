@@ -7,7 +7,7 @@ menuconfig DRIVERS_PCA9685_PWM_OUT
 if DRIVERS_PCA9685_PWM_OUT
 	config PCA9685_USE_EXTERNAL_CRYSTAL
 	    bool "Use external crystal for clock reference"
-	    default n
+	    default y
 
     config PCA9685_EXTERNAL_CRYSTAL_FREQ
         int "External crystal frequency"
