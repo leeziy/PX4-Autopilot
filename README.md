@@ -1,9 +1,11 @@
 # 声明
 使用此仓库的工作请注明引用
+
 # 硬件
-提供电路板生产图（Gerber）、原料表（BOM）、坐标表，自行生产
+提供电路板生产图（Gerber）、原料表（BOM）、坐标表
 
 [工程文件](https://drive.google.com/drive/folders/1j-9ox7u_mI9sugwPOwp103dI1jImfYRB?usp=sharing)
+
 # 软件
 ## 1 下载Firefly RK3588S SDK，在设备树中配置用户态使用SPI-1接口，重新编译设备树文件或整个系统
 ```
@@ -52,5 +54,6 @@ nano rk3588s_mc.config //注释掉第44行
 sudo ./bin/px4 -s rk3588s_mc.config //完成启动
 sudo taskset -c x-x ./bin/px4 -s rk3588s_mc.config //限制运行核心启动
 ```
+
 ## 3 QGroundControl配置与调参
 略
