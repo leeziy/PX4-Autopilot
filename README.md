@@ -1,13 +1,7 @@
 # 声明
 使用此仓库的工作请注明引用
 
-例:
-```
-Z. Li, “Modified PX4 Autopilot for ROC-RK3588S-PC”, GitHub repository, 2024. [Online]. Available: https://github.com/leeziy/PX4-Autopilot
-```
-
 # 硬件
-
 传感器附加板根据下图自行设计
 
 结构图
