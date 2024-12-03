@@ -60,7 +60,7 @@ cd px4
 sudo ./bin/px4 -s rk3588s_mc.config
 exit
 nano rk3588s_mc.config
-注释掉第44行
+注释掉第44行 param reset_all
 全系统断电重启
 ```
 正常启动
