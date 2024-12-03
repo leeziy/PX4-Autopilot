@@ -44,15 +44,20 @@ export AUTOPILOT_USER=username
 make firefly_rk3588s_arm64
 make firefly_rk3588s_arm64 upload
 ```
-### 2.3 初次运行PX4
+### 2.3 运行PX4
+初次启动
 ```shell
 cd px4
 sudo ./bin/px4 -s rk3588s_mc.config
 exit
-nano rk3588s_mc.config //注释掉第44行
-//全系统断电重启
-sudo ./bin/px4 -s rk3588s_mc.config //完成启动
-sudo taskset -c x-x ./bin/px4 -s rk3588s_mc.config //限制运行核心启动
+nano rk3588s_mc.config
+注释掉第44行
+全系统断电重启
+```
+正常启动
+```shell
+sudo ./bin/px4 -s rk3588s_mc.config //普通启动
+sudo taskset -c x-x ./bin/px4 -s rk3588s_mc.config //选择运行核心启动
 ```
 
 ## 3 QGroundControl配置与调参
