@@ -7,7 +7,7 @@ Z. Li, “Modified PX4 Autopilot for ROC-RK3588S-PC”, GitHub repository, 2024.
 ```
 
 # 硬件
-提供Minimum_Shield电路板生产图（Gerber）、原料表（BOM）、坐标表 [Minimum_Shield](https://github.com/leeziy/PX4-Autopilot/tree/ROC-RK3588S-PC/Minimun_Shield)
+提供Minimum_Shield传感器附加电路板生产图（Gerber）、原料表（BOM）、坐标表 [Minimum_Shield](https://github.com/leeziy/PX4-Autopilot/tree/ROC-RK3588S-PC/Minimun_Shield)
 
 结构图
 
