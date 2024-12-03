@@ -1,13 +1,7 @@
 # 声明
 使用此仓库的工作请注明引用
 ```
-@misc{leeziy_PX4_Autopilot,
-  author = {Li, Zeying},
-  title = {PX4-Autopilot},
-  year = {2024},
-  howpublished = {\url{https://github.com/leeziy/PX4-Autopilot}},
-  note = {Accessed: YYYY-MM-DD}
-}
+Z. Li, “PX4-Autopilot,” GitHub repository, 2024. [Online]. Available: https://github.com/leeziy/PX4-Autopilot
 ```
 
 # 硬件
