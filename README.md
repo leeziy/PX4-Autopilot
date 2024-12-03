@@ -7,6 +7,9 @@ Z. Li, “Modified PX4 Autopilot for ROC-RK3588S-PC”, GitHub repository, 2024.
 ```
 
 # 硬件
+
+传感器附加板根据下图自行设计
+
 结构图
 
 ![结构图](Structure.png)
