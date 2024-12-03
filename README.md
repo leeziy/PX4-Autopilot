@@ -2,9 +2,15 @@
 使用此仓库的工作请注明引用
 
 # 硬件
-提供Minimum_Shield电路板生产图（Gerber）、原料表（BOM）、坐标表
+提供Minimum_Shield电路板生产图（Gerber）、原料表（BOM）、坐标表 [Minimum_Shield](https://github.com/leeziy/PX4-Autopilot/tree/ROC-RK3588S-PC/Minimun_Shield)
 
-[Minimum_Shield](https://github.com/leeziy/PX4-Autopilot/tree/ROC-RK3588S-PC/Minimun_Shield)
+结构图
+
+![结构图](Minimun_Shield/Structure.png)
+
+安装图
+
+![安装图](Minimun_Shield/Usage.png)
 
 # 软件
 ## 1 下载Firefly RK3588S SDK，在设备树中配置用户态使用SPI-1接口，重新编译设备树文件或整个系统
