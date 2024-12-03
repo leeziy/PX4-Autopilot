@@ -64,7 +64,8 @@ nano rk3588s_mc.config
 sudo ./bin/px4 -s rk3588s_mc.config //普通启动
 sudo taskset -c X-X ./bin/px4 -s rk3588s_mc.config //选择运行核心启动
 ```
-
+开机自启动
+略
 ## 3 QGroundControl配置与调参
 略
 
