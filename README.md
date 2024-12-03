@@ -34,7 +34,7 @@ kernel/arch/arm64/boot/dts/rockchip/roc-rk3588s-pc.dtsi
 ```
 重新编译设备树或内核或完整系统
 ## 2 编译PX4
-### 2.1 安装工具链与环境
+### 2.1 安装交叉编译环境与工具链
 ```
 git clone https://github.com/leeziy/PX4-Autopilot --recursive
 bash ./PX4-Autopilot/Tools/setup/ubuntu.sh --no-nuttx --no-sim-tools
