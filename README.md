@@ -19,7 +19,8 @@ Z. Li, “Modified PX4 Autopilot for ROC-RK3588S-PC”, GitHub repository, 2024.
 ![安装图](Install.png)
 
 # 软件
-## 1 下载Firefly RK3588S SDK，在设备树中配置用户态使用SPI-1接口，重新编译设备树文件或整个系统
+## 1 操作系统修改
+下载Firefly RK3588S SDK
 ```
 kernel/arch/arm64/boot/dts/rockchip/roc-rk3588s-pc.dtsi
 ```
@@ -40,6 +41,7 @@ kernel/arch/arm64/boot/dts/rockchip/roc-rk3588s-pc.dtsi
             };
 };
 ```
+重新编译设备树或内核或完整系统
 ## 2 编译PX4
 ### 2.1 安装工具链与环境
 ```
