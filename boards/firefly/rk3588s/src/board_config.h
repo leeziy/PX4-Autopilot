@@ -39,7 +39,7 @@
 
 #pragma once
 
-#define BOARD_OVERRIDE_UUID "RPIID00000000000" // must be of length 16
+#define BOARD_OVERRIDE_UUID "ROCRK3588SPCID00" // must be of length 16
 #define PX4_SOC_ARCH_ID     PX4_SOC_ARCH_ID_RPI
 
 
