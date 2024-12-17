@@ -37,6 +37,9 @@ kernel/arch/arm64/boot/dts/rockchip/roc-rk3588s-pc.dtsi
 ### 2.1 安装交叉编译环境与工具链
 ```
 git clone https://github.com/leeziy/PX4-Autopilot --recursive
+make clean
+make distclean
+make submodulesclean
 bash ./PX4-Autopilot/Tools/setup/ubuntu.sh --no-nuttx --no-sim-tools
 sudo apt-get install -y gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu
 sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-8 100 --slave /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-8
