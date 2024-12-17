@@ -5,10 +5,6 @@
 
 ![结构图](Structure.png)
 
-安装图
-
-![安装图](Install.png)
-
 # 软件
 ## 1 操作系统修改
 下载Firefly RK3588S SDK
