@@ -39,7 +39,7 @@ make clean
 make distclean
 make submodulesclean
 
-bash ./PX4-Autopilot/Tools/setup/ubuntu.sh --no-nuttx --no-sim-tools
+bash PX4-Autopilot/Tools/setup/ubuntu.sh --no-nuttx --no-sim-tools
 sudo apt-get install gcc-8-aarch64-linux-gnu g++-8-aarch64-linux-gnu
 sudo update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-gcc-8 100 --slave /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ /usr/bin/aarch64-linux-gnu-g++-8
 sudo update-alternatives --config aarch64-linux-gnu-gcc
