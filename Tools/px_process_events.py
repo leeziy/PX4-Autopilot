@@ -87,14 +87,9 @@ def main():
 
     # canonicalize + remove duplicates
     src_paths = set()
-    # for path in args.src_path:
-    #     src_paths.add(os.path.realpath(os.path.join(args.base_path, path)))
-    
-    f = open(args.src_list, 'r')
-    for line in f:
-        src_paths.add(os.path.realpath(os.path.join(args.base_path, line.strip())))
-    f.close()
-    
+    for path in args.src_path:
+        src_paths.add(os.path.realpath(os.path.join(args.base_path, path)))
+       
     if not scanner.ScanDir(src_paths, parser):
         sys.exit(1)
 
