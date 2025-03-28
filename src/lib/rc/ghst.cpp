@@ -97,7 +97,8 @@ int ghst_config(int uart_fd)
 
 	// no parity, one stop bit
 	tcgetattr(uart_fd, &t);
-	cfsetspeed(&t, GHST_BAUDRATE);
+	cfsetispeed(&t, GHST_BAUDRATE);
+	cfsetospeed(&t, GHST_BAUDRATE);
 	t.c_cflag &= ~(CSTOPB | PARENB);
 	memset(prev_rc_vals, static_cast<int>(UINT16_MAX), sizeof(uint16_t) * GHST_MAX_NUM_CHANNELS);
 	ret_val = tcsetattr(uart_fd, TCSANOW, &t);

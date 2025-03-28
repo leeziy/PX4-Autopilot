@@ -39,6 +39,7 @@
  * Base class for devices connected via SPI.
  */
 
+// #include <SylixOS.h>
 #include "../CDev.hpp"
 #include <px4_platform_common/spi.h>
 
@@ -50,13 +51,17 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/types.h>
-#include <linux/spi/spidev.h>
+
+#define LW_SPI_M_CPOL_0      0x0000                                     /*  CPOL 配置                   */
+#define LW_SPI_M_CPOL_1      0x0001
+#define LW_SPI_M_CPHA_0      0x0000                                     /*  CPHA 配置                   */
+#define LW_SPI_M_CPHA_1      0x0002
 
 enum spi_mode_e {
-	SPIDEV_MODE0 = SPI_MODE_0, /* CPOL=0 CHPHA=0 */
-	SPIDEV_MODE1 = SPI_MODE_1, /* CPOL=0 CHPHA=1 */
-	SPIDEV_MODE2 = SPI_MODE_2, /* CPOL=1 CHPHA=0 */
-	SPIDEV_MODE3 = SPI_MODE_3  /* CPOL=1 CHPHA=1 */
+	SPIDEV_MODE0 = 0, /* CPOL=0 CHPHA=0 */
+	SPIDEV_MODE1 = LW_SPI_M_CPHA_1, /* CPOL=0 CHPHA=1 */
+	SPIDEV_MODE2 = LW_SPI_M_CPOL_1, /* CPOL=1 CHPHA=0 */
+	SPIDEV_MODE3 = LW_SPI_M_CPOL_1 | LW_SPI_M_CPHA_1  /* CPOL=1 CHPHA=1 */
 };
 
 struct I2CSPIDriverConfig;
@@ -194,12 +199,12 @@ protected:
 
 #else
 
-enum spi_mode_e {
-	SPIDEV_MODE0 = 0, /* CPOL=0 CHPHA=0 */
-	SPIDEV_MODE1 = 1, /* CPOL=0 CHPHA=1 */
-	SPIDEV_MODE2 = 2, /* CPOL=1 CHPHA=0 */
-	SPIDEV_MODE3 = 3  /* CPOL=1 CHPHA=1 */
-};
+// enum spi_mode_e {
+// 	SPIDEV_MODE0 = 0, /* CPOL=0 CHPHA=0 */
+// 	SPIDEV_MODE1 = 1, /* CPOL=0 CHPHA=1 */
+// 	SPIDEV_MODE2 = 2, /* CPOL=1 CHPHA=0 */
+// 	SPIDEV_MODE3 = 3  /* CPOL=1 CHPHA=1 */
+// };
 #endif // __PX4_LINUX
 
 #endif // CONFIG_SPI

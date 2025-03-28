@@ -56,7 +56,7 @@
 
 #ifdef __PX4_QURT
 // dprintf is not available on QURT. Use the usual output to mini-dm.
-#define dprintf(_fd, _text, ...) ((_fd) == 1 ? PX4_INFO((_text), ##__VA_ARGS__) : (void)(_fd))
+#define fdprintf(_fd, _text, ...) ((_fd) == 1 ? PX4_INFO((_text), ##__VA_ARGS__) : (void)(_fd))
 #endif
 
 extern struct system_load_s system_load;
@@ -86,14 +86,14 @@ void print_load(int fd, struct print_load_s *print_state)
 
 	/* print system information */
 	if (fd == 1) {
-		dprintf(fd, "\033[H"); /* move cursor home and clear screen */
+		fdprintf(fd, "\033[H"); /* move cursor home and clear screen */
 
 	} else {
 		memset(clear_line, 0, sizeof(clear_line));
 	}
 
 #if defined(__PX4_LINUX) || defined(__PX4_CYGWIN) || defined(__PX4_QURT)
-	dprintf(fd, "%sTOP NOT IMPLEMENTED ON LINUX, QURT, WINDOWS (ONLY ON NUTTX, APPLE)\n", clear_line);
+	fdprintf(fd, "%sTOP NOT IMPLEMENTED ON LINUX, QURT, WINDOWS (ONLY ON NUTTX, APPLE)\n", clear_line);
 
 #elif defined(__PX4_DARWIN)
 	pid_t pid = getpid();   //-- this is the process id you need info for
@@ -130,7 +130,7 @@ void print_load(int fd, struct print_load_s *print_state)
 	long tot_usec = 0;
 	long tot_cpu = 0;
 
-	dprintf(fd, "%sThreads: %d total\n",
+	fdprintf(fd, "%sThreads: %d total\n",
 		clear_line,
 		th_cnt);
 
@@ -157,7 +157,7 @@ void print_load(int fd, struct print_load_s *print_state)
 		// int ret = pthread_getname_np(pthread_t *thread,
 		//                      const char *name, size_t len);
 
-		dprintf(fd, "thread %d\t\t %d\n", j, basic_info_th->cpu_usage);
+		fdprintf(fd, "thread %d\t\t %d\n", j, basic_info_th->cpu_usage);
 	}
 
 	kr = vm_deallocate(mach_task_self(), (vm_offset_t)thread_list,

@@ -42,6 +42,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef TIOCSSINGLEWIRE
 #include <sys/ioctl.h>
@@ -58,7 +60,8 @@ using namespace time_literals;
 
 #if defined(__PX4_LINUX)
 #include <sys/ioctl.h>
-#include <asm-generic/termbits.h>
+// #include <asm-generic/termbits.h>
+#include <termios.h>
 #else
 #include <termios.h>
 #endif
@@ -139,7 +142,7 @@ sbus_decode(uint64_t frame_time, uint8_t *frame, uint16_t *values, uint16_t *num
 int
 sbus_init(const char *device, bool singlewire)
 {
-	int sbus_fd = open(device, O_RDWR | O_NONBLOCK);
+	int sbus_fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
 
 	int ret = sbus_config(sbus_fd, singlewire);
 
@@ -158,33 +161,22 @@ sbus_config(int sbus_fd, bool singlewire)
 
 #if defined(__PX4_LINUX)
 
-	struct termios2 tio = {};
+	struct termios tio = {};
 
-	if (0 != ioctl(sbus_fd, TCGETS2, &tio)) {
-		return ret;
-	}
+	tcgetattr(sbus_fd, &tio);
 
-	/**
-	 * Setting serial port,8E2, non-blocking.100Kbps
-	 */
-	tio.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL
-			 | IXON);
+	tio.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
 	tio.c_iflag |= (INPCK | IGNPAR);
 	tio.c_oflag &= ~OPOST;
 	tio.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
 	tio.c_cflag &= ~(CSIZE | CRTSCTS | PARODD | CBAUD);
-	/**
-	 * use BOTHER to specify speed directly in c_[io]speed member
-	 */
-	tio.c_cflag |= (CS8 | CSTOPB | CLOCAL | PARENB | BOTHER | CREAD);
-	tio.c_ispeed = 100000;
-	tio.c_ospeed = 100000;
+	tio.c_cflag |= (CS8 | CSTOPB | CLOCAL | PARENB | CREAD);
 	tio.c_cc[VMIN] = 25;
 	tio.c_cc[VTIME] = 0;
 
-	if (0 != ioctl(sbus_fd, TCSETS2, &tio)) {
-		return ret;
-	}
+	tcsetattr(sbus_fd, TCSANOW, &tio);
+
+	ioctl(sbus_fd, SIO_BAUD_SET, 100000);
 
 	ret = 0;
 #else
@@ -194,7 +186,8 @@ sbus_config(int sbus_fd, bool singlewire)
 
 		/* 100000bps, even parity, two stop bits */
 		tcgetattr(sbus_fd, &t);
-		cfsetspeed(&t, 100000);
+		cfsetispeed(&t, 100000);
+		cfsetospeed(&t, 100000);
 		t.c_cflag |= (CSTOPB | PARENB);
 		tcsetattr(sbus_fd, TCSANOW, &t);
 

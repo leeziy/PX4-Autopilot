@@ -43,12 +43,14 @@
 #if defined(CONFIG_SPI)
 
 #ifdef __PX4_LINUX
-
+#include <SylixOS.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/types.h>
-#include <linux/spi/spidev.h>
+
+PLW_SPI_ADAPTER spiAdpt;
+PLW_SPI_FUNCS   spiFun;
 
 #include <px4_platform_common/i2c_spi_buses.h>
 #include <px4_platform_common/px4_config.h>
@@ -78,7 +80,6 @@ SPI::SPI(const I2CSPIDriverConfig &config)
 SPI::~SPI()
 {
 	if (_fd >= 0) {
-		::close(_fd);
 		_fd = -1;
 	}
 }
@@ -87,112 +88,94 @@ int
 SPI::init()
 {
 	// Open the actual SPI device
-	char dev_path[16];
-	snprintf(dev_path, sizeof(dev_path), "/dev/spidev%i.%i", get_device_bus(), PX4_SPI_DEV_ID(_device));
-	DEVICE_DEBUG("%s", dev_path);
-	_fd = ::open(dev_path, O_RDWR);
-
-	if (_fd < 0) {
-		PX4_ERR("could not open %s", dev_path);
-		return PX4_ERROR;
+	 char dev_path[16] {};
+	 snprintf(dev_path, sizeof(dev_path), "/bus/spi/%i", get_device_bus());
+	 spiAdpt = API_SpiAdapterGet(dev_path);
+	 if (LW_NULL == spiAdpt) {
+		 DEVICE_DEBUG("failed to get SPI Adaptor");
+		 _fd = -1;
+		 goto out;
+	 }
+	 spiFun = spiAdpt->SPIADAPTER_pspifunc;
+	 if (LW_NULL == spiFun) {
+		DEVICE_DEBUG("failed to get SPI Function");
+		_fd = -1;
+		goto out;
 	}
-
-	/* call the probe function to check whether the device is present */
-	int ret = probe();
-
-	if (ret != OK) {
+	_fd = probe();
+	if (_fd != 0) {
 		DEVICE_DEBUG("probe failed");
-		return ret;
+		_fd = -1;
+		goto out;
 	}
-
-	/* do base class init, which will create the device node, etc. */
-	ret = CDev::init();
-
-	if (ret != OK) {
+	_fd = CDev::init();
+	if (_fd != 0) {
 		DEVICE_DEBUG("cdev init failed");
-		return ret;
+		_fd = -1;
+		goto out;
 	}
+	 _fd = 0;
+	 // tell the world where we are
+	 DEVICE_DEBUG("on SPI bus %d", get_device_bus());
 
-	/* tell the world where we are */
-	DEVICE_DEBUG("on SPI bus %d at %d (%u KHz)", get_device_bus(), PX4_SPI_DEV_ID(_device), _frequency / 1000);
+ out:
 
-	return PX4_OK;
-}
+	 return _fd;
+
+ }
 
 int
 SPI::transfer(uint8_t *send, uint8_t *recv, unsigned len)
 {
+	LW_SPI_MESSAGE  spiMsg;
+
 	if ((send == nullptr) && (recv == nullptr)) {
 		return -EINVAL;
 	}
 
-	// set write mode of SPI
-	int result = ::ioctl(_fd, SPI_IOC_WR_MODE, &_mode);
+	spiMsg.SPIMSG_pucRdBuffer   = recv;
+	spiMsg.SPIMSG_pucWrBuffer   = send;
+	spiMsg.SPIMSG_uiLen         = len;
+	spiMsg.SPIMSG_pfuncComplete = LW_NULL;
+	spiMsg.SPIMSG_usFlag         = LW_SPI_M_CPOL_1 | LW_SPI_M_CPHA_1|LW_SPI_M_CPOL_EN|LW_SPI_M_CPHA_EN;
 
-	if (result == -1) {
-		PX4_ERR("can’t set spi mode");
-		return PX4_ERROR;
+	spiFun->SPIFUNC_pfuncMasterCtl(spiAdpt, LW_SPI_CTL_BAUDRATE, _frequency);
+	_fd = spiFun->SPIFUNC_pfuncMasterXfer(spiAdpt, &spiMsg, 1);
+
+	if (_fd < 0) {
+		DEVICE_DEBUG("SPI transfer failed");
+	}else{
+		_fd = 0;
 	}
 
-	spi_ioc_transfer spi_transfer{};
-
-	spi_transfer.tx_buf = (uint64_t)send;
-	spi_transfer.rx_buf = (uint64_t)recv;
-	spi_transfer.len = len;
-	spi_transfer.speed_hz = _frequency;
-	spi_transfer.bits_per_word = 8;
-
-	result = ::ioctl(_fd, SPI_IOC_MESSAGE(1), &spi_transfer);
-
-	if (result != (int)len) {
-		PX4_ERR("write failed. Reported %d bytes written (%s)", result, strerror(errno));
-		return PX4_ERROR;
-	}
-
-	return PX4_OK;
+	return _fd;
 }
 
 int
 SPI::transferhword(uint16_t *send, uint16_t *recv, unsigned len)
 {
+	LW_SPI_MESSAGE  spiMsg;
+
 	if ((send == nullptr) && (recv == nullptr)) {
 		return -EINVAL;
 	}
 
-	// set write mode of SPI
-	int result = ::ioctl(_fd, SPI_IOC_WR_MODE, &_mode);
+	spiMsg.SPIMSG_pucRdBuffer   = (UINT8*)&recv;
+	spiMsg.SPIMSG_pucWrBuffer   = (UINT8*)&send;
+	spiMsg.SPIMSG_uiLen         = len;
+	spiMsg.SPIMSG_pfuncComplete = LW_NULL;
+	spiMsg.SPIMSG_usFlag         = LW_SPI_M_CPOL_1 | LW_SPI_M_CPHA_1|LW_SPI_M_CPOL_EN|LW_SPI_M_CPHA_EN;
 
-	if (result == -1) {
-		PX4_ERR("can’t set spi mode");
-		return PX4_ERROR;
+	spiFun->SPIFUNC_pfuncMasterCtl(spiAdpt, LW_SPI_CTL_BAUDRATE, _frequency);
+	_fd = spiFun->SPIFUNC_pfuncMasterXfer(spiAdpt, &spiMsg, 1);
+
+	if (_fd < 0) {
+		DEVICE_DEBUG("SPI transfer failed");
+	}else{
+		_fd = 0;
 	}
 
-	int bits = 16;
-	result = ::ioctl(_fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
-
-	if (result == -1) {
-		PX4_ERR("can’t set 16 bit spi mode");
-		return PX4_ERROR;
-	}
-
-	spi_ioc_transfer spi_transfer[1] {};
-
-	spi_transfer[0].tx_buf = (uint64_t)send;
-	spi_transfer[0].rx_buf = (uint64_t)recv;
-	spi_transfer[0].len = len * 2;
-	spi_transfer[0].speed_hz = _frequency;
-	//spi_transfer[0].bits_per_word = 8;
-	//spi_transfer[0].delay_usecs = 10;
-	spi_transfer[0].cs_change = true;
-
-	result = ::ioctl(_fd, SPI_IOC_MESSAGE(1), &spi_transfer);
-
-	if (result != (int)(len * 2)) {
-		PX4_ERR("write failed. Reported %d bytes written (%s)", result, strerror(errno));
-		return PX4_ERROR;
-	}
-
-	return PX4_OK;
+	return _fd;
 }
 
 } // namespace device

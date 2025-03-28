@@ -32,8 +32,13 @@ kernel/arch/arm64/boot/dts/rockchip/roc-rk3588s-pc.dtsi
 ## 2 编译PX4
 ### 2.1 安装交叉编译环境与工具链
 ```
+export PYTHONUTF8=1
+export PATH=/c/Users/Leeziy/.conda/envs/PX4:$PATH
+export PATH=/c/ACOINFO/RealEvo/compiler/aarch64-sylixos-toolchain/bin:$PATH
+export PATH=/c/ACOINFO/RealEvo/compiler/aarch64-sylixos-toolchain/aarch64-sylixos-elf/bin:$PATH
+
 git clone https://github.com/leeziy/PX4-Autopilot --recursive
-git checkout
+git checkout ROC-RK3588S-PC-SylixOS
 
 make clean
 make distclean

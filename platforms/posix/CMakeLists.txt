@@ -35,6 +35,12 @@ else()
 		)
 endif()
 
+target_link_directories(px4
+	PRIVATE
+	/c/Users/Leeziy/eclipse-workspace/RK3588S/libsylixos/Debug
+	/c/Users/Leeziy/eclipse-workspace/RK3588S/libcextern/Debug
+)
+
 target_link_libraries(px4
 	PRIVATE
 		${module_libraries}
@@ -42,15 +48,32 @@ target_link_libraries(px4
 		parameters
 )
 
-if((NOT APPLE) AND (NOT ANDROID))
-	target_link_libraries(px4 PRIVATE rt)
-endif()
+target_link_options(px4
+	PRIVATE
+		-Wl,-shared
+		-fPIC
+		-shared
+)
 
-if(NOT ANDROID)
-	target_link_libraries(px4 PRIVATE pthread)
-endif()
+# if((NOT APPLE) AND (NOT ANDROID))
+# 	target_link_libraries(px4 PRIVATE rt)
+# endif()
+
+# if(NOT ANDROID)
+# 	target_link_libraries(px4 PRIVATE pthread)
+# endif()
 
 target_link_libraries(px4 PRIVATE uORB)
+
+target_link_libraries(px4
+	PRIVATE
+		vpmpdm
+		cextern
+		stdc++
+		dsohandle
+		gcc
+
+)
 
 if (CMAKE_BUILD_TYPE STREQUAL FuzzTesting)
 	target_include_directories(px4 PRIVATE SYSTEM "${CMAKE_BINARY_DIR}/mavlink}")

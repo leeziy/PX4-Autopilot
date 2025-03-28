@@ -45,12 +45,21 @@ endforeach(f)
 set(generated_events_dir ${PX4_BINARY_DIR}/events)
 set(generated_events_px4_file ${generated_events_dir}/px4.json)
 set(generated_events_common_enums_file ${generated_events_dir}/common_with_enums.json)
+
+# Join the list elements with spaces
+string(REPLACE ";" "\n" all_px4_src_files_relative_str "${all_px4_src_files_relative}")
+
+# Write the result to a file
+file(WRITE ${generated_events_dir}/relative_paths.txt "${all_px4_src_files_relative_str}")
+
 add_custom_command(OUTPUT ${generated_events_px4_file}
 	COMMAND ${CMAKE_COMMAND} -E make_directory ${generated_events_dir}
 	COMMAND ${PYTHON_EXECUTABLE} ${PX4_SOURCE_DIR}/Tools/px_process_events.py
 		--base-path ${PX4_SOURCE_DIR}/src
-		--src-path ${all_px4_src_files_relative}
-		--json ${generated_events_px4_file} #--verbose
+		# --src-path ${all_px4_src_files_relative}
+		--src-list ${generated_events_dir}/relative_paths.txt
+		--json ${generated_events_px4_file}
+		# --verbose
 	DEPENDS
 		${all_px4_src_files}
 		${PX4_SOURCE_DIR}/Tools/px_process_events.py

@@ -40,148 +40,139 @@
  *       that is supplied.  Should we just depend on the bus knowing?
  */
 
-#include "I2C.hpp"
 
-#if defined(CONFIG_I2C)
+ #include "I2C.hpp"
 
-#ifdef __PX4_LINUX
+ #if defined(CONFIG_I2C)
 
-#include <linux/i2c.h>
-#include <linux/i2c-dev.h>
+ #ifdef __PX4_LINUX
+ // #define __SYLIXOS_KERNEL
+ #include <SylixOS.h>
 
-#include <px4_platform_common/i2c_spi_buses.h>
+ PLW_I2C_ADAPTER i2cAdpt;
+ PLW_I2C_FUNCS   i2cFun;
 
-namespace device
-{
+ #include <px4_platform_common/i2c_spi_buses.h>
 
-I2C::I2C(uint8_t device_type, const char *name, const int bus, const uint16_t address, const uint32_t frequency) :
-	CDev(name, nullptr)
-{
-	// fill in _device_id fields for a I2C device
-	_device_id.devid_s.devtype = device_type;
-	_device_id.devid_s.bus_type = DeviceBusType_I2C;
-	_device_id.devid_s.bus = bus;
-	_device_id.devid_s.address = address;
-}
+ namespace device
+ {
 
-I2C::I2C(const I2CSPIDriverConfig &config)
-	: I2C(config.devid_driver_index, config.module_name, config.bus, config.i2c_address, config.bus_frequency)
-{
-}
+ I2C::I2C(uint8_t device_type, const char *name, const int bus, const uint16_t address, const uint32_t frequency) :
+	 CDev(name, nullptr)
+ {
+	 // fill in _device_id fields for a I2C device
+	 _device_id.devid_s.devtype = device_type;
+	 _device_id.devid_s.bus_type = DeviceBusType_I2C;
+	 _device_id.devid_s.bus = bus;
+	 _device_id.devid_s.address = address;
+ }
 
-I2C::~I2C()
-{
-	if (_fd >= 0) {
-		::close(_fd);
-		_fd = -1;
-	}
-}
+ I2C::I2C(const I2CSPIDriverConfig &config)
+	 : I2C(config.devid_driver_index, config.module_name, config.bus, config.i2c_address, config.bus_frequency)
+ {
+ }
 
-int
-I2C::init()
-{
-	int ret = PX4_ERROR;
+ I2C::~I2C()
+ {
+	 if (_fd >= 0) {
+	 	_fd = -1;
+	 }
+ }
 
+ int
+ I2C::init()
+ {
 	// Open the actual I2C device
-	char dev_path[16] {};
-	snprintf(dev_path, sizeof(dev_path), "/dev/i2c-%i", get_device_bus());
-	_fd = ::open(dev_path, O_RDWR);
-
-	if (_fd < 0) {
-		DEVICE_DEBUG("failed to init I2C");
-		ret = -ENOENT;
-		goto out;
-	}
-
-	// call the probe function to check whether the device is present
-	ret = probe();
-
-	if (ret != OK) {
-		DEVICE_DEBUG("probe failed");
-		goto out;
-	}
-
-	// do base class init, which will create device node, etc
-	ret = CDev::init();
-
-	if (ret != OK) {
-		DEVICE_DEBUG("cdev init failed");
-		goto out;
-	}
-
-	// tell the world where we are
-	DEVICE_DEBUG("on I2C bus %d at 0x%02x", get_device_bus(), get_device_address());
-
-out:
-
-	if ((ret != OK) && !(_fd < 0)) {
-		::close(_fd);
+	 char dev_path[16];
+	 snprintf(dev_path, sizeof(dev_path), "/bus/i2c/%i", get_device_bus());
+	 i2cAdpt = API_I2cAdapterGet(dev_path);
+	 if (LW_NULL == i2cAdpt) {
+		 DEVICE_DEBUG("failed to get I2C Adaptor");
+		 _fd = -1;
+		 goto out;
+	 }
+	 i2cFun = i2cAdpt->I2CADAPTER_pi2cfunc;
+	 if (LW_NULL == i2cFun) {
+		DEVICE_DEBUG("failed to get I2C Function");
 		_fd = -1;
+		goto out;
 	}
+	// _fd = probe();
+	// if (_fd != 0) {
+	// 	DEVICE_DEBUG("probe failed");
+	// 	_fd = -1;
+	// 	goto out;
+	// }
+	_fd = CDev::init();
+	if (_fd != 0) {
+		DEVICE_DEBUG("cdev init failed");
+		_fd = -1;
+		goto out;
+	}
+	 _fd = 0;
+	 // tell the world where we are
+	 DEVICE_DEBUG("on I2C bus %d", get_device_bus());
 
-	return ret;
-}
+ out:
 
-int
-I2C::transfer(const uint8_t *send, const unsigned send_len, uint8_t *recv, const unsigned recv_len)
-{
-	int ret = PX4_ERROR;
+	 return _fd;
+
+ }
+
+ int
+ I2C::transfer(const uint8_t *send, const unsigned send_len, uint8_t *recv, const unsigned recv_len)
+ {
+
 	unsigned retry_count = 0;
+	 if (_fd < 0) {
+		 PX4_ERR("I2C device not opened");
+		 return PX4_ERROR;
+	 }
 
-	if (_fd < 0) {
-		PX4_ERR("I2C device not opened");
-		return PX4_ERROR;
-	}
+	 do {
+		 DEVICE_DEBUG("transfer out %p/%u  in %p/%u", send, send_len, recv, recv_len);
 
-	do {
-		DEVICE_DEBUG("transfer out %p/%u  in %p/%u", send, send_len, recv, recv_len);
+		 unsigned msgs = 0;
+		 LW_I2C_MESSAGE msgv[2];
 
-		unsigned msgs = 0;
-		struct i2c_msg msgv[2] {};
+		 if (send_len > 0) {
+			 msgv[msgs].I2CMSG_usAddr = get_device_address();
+			 msgv[msgs].I2CMSG_usFlag = 0;
+			 msgv[msgs].I2CMSG_pucBuffer = const_cast<uint8_t *>(send);
+			 msgv[msgs].I2CMSG_usLen = send_len;
+			 msgs++;
+		 }
 
-		if (send_len > 0) {
-			msgv[msgs].addr = get_device_address();
-			msgv[msgs].flags = 0;
-			msgv[msgs].buf = const_cast<uint8_t *>(send);
-			msgv[msgs].len = send_len;
-			msgs++;
-		}
+		 if (recv_len > 0) {
+			 msgv[msgs].I2CMSG_usAddr = get_device_address();
+			 msgv[msgs].I2CMSG_usFlag = LW_I2C_M_RD;
+			 msgv[msgs].I2CMSG_pucBuffer = recv;
+			 msgv[msgs].I2CMSG_usLen = recv_len;
+			 msgs++;
+		 }
 
-		if (recv_len > 0) {
-			msgv[msgs].addr = get_device_address();
-			msgv[msgs].flags = I2C_M_RD;
-			msgv[msgs].buf = recv;
-			msgv[msgs].len = recv_len;
-			msgs++;
-		}
+		 if (msgs == 0) {
+			 return -EINVAL;
+		 }
 
-		if (msgs == 0) {
-			return -EINVAL;
-		}
+		 _fd = i2cFun->I2CFUNC_pfuncMasterXfer(i2cAdpt, msgv, msgs);
 
-		i2c_rdwr_ioctl_data packets{};
-		packets.msgs  = msgv;
-		packets.nmsgs = msgs;
+		 if (_fd < 0) {
+			 DEVICE_DEBUG("I2C transfer failed");
 
-		int ret_ioctl = ::ioctl(_fd, I2C_RDWR, (unsigned long)&packets);
+		 } else {
+			 // success
+			 _fd = PX4_OK;
+			 break;
+		 }
 
-		if (ret_ioctl == -1) {
-			DEVICE_DEBUG("I2C transfer failed");
-			ret = PX4_ERROR;
+	 } while (retry_count++ < _retries);
 
-		} else {
-			// success
-			ret = PX4_OK;
-			break;
-		}
+	 return _fd;
+ }
 
-	} while (retry_count++ < _retries);
+ } // namespace device
 
-	return ret;
-}
+ #endif // __PX4_LINUX
 
-} // namespace device
-
-#endif // __PX4_LINUX
-
-#endif // CONFIG_I2C
+ #endif // CONFIG_I2C

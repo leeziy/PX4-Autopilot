@@ -45,6 +45,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <errno.h>
+#include <execinfo.h>
 
 #if (defined(__PX4_DARWIN) || defined(__PX4_CYGWIN) || defined(__PX4_POSIX)) && !defined(__PX4_QURT)
 
@@ -58,14 +59,15 @@ int px4_sem_init(px4_sem_t *s, int pshared, unsigned value)
 	pthread_cond_init(&(s->wait), nullptr);
 	pthread_mutex_init(&(s->lock), nullptr);
 
-#if !defined(__PX4_DARWIN)
-	// We want to use CLOCK_MONOTONIC if possible but we can't on macOS
-	// because it's not available.
-	pthread_condattr_t attr;
-	pthread_condattr_init(&attr);
-	pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
-	pthread_cond_init(&(s->wait), &attr);
-#endif
+// #if !defined(__PX4_DARWIN)
+// 	// We want to use CLOCK_MONOTONIC if possible but we can't on macOS
+// 	// because it's not available.
+// 	pthread_condattr_t attr;
+// 	pthread_condattr_init(&attr);
+// 	pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
+// 	pthread_cond_init(&(s->wait), &attr);
+
+// #endif
 
 	return 0;
 }

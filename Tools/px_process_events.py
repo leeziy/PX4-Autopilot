@@ -50,10 +50,14 @@ import codecs
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Process events definitions.")
-    parser.add_argument("-s", "--src-path",
-                        default=["../src"],
-                        metavar="PATH",
-                        nargs='*',
+    # parser.add_argument("-s", "--src-path",
+    #                     default=["../src"],
+    #                     metavar="PATH",
+    #                     nargs='*',
+    #                     help="one or more paths/files to source files to scan for events")
+    parser.add_argument("-sl", "--src-list",
+                        metavar="FILE",
+                        nargs='?',
                         help="one or more paths/files to source files to scan for events")
     parser.add_argument("-b", "--base-path",
                         default="",
@@ -87,9 +91,16 @@ def main():
 
     # canonicalize + remove duplicates
     src_paths = set()
-    for path in args.src_path:
-        src_paths.add(os.path.realpath(os.path.join(args.base_path, path)))
-       
+    # for path in args.src_path:
+    #     src_paths.add(os.path.realpath(os.path.join(args.base_path, path)))
+
+    f = open(args.src_list, 'r')
+    for line in f:
+        src_paths.add(os.path.realpath(os.path.join(args.base_path, line.strip())))
+    f.close()
+
+    # print("Scanning source path/files " + str(src_paths))
+
     if not scanner.ScanDir(src_paths, parser):
         sys.exit(1)
 

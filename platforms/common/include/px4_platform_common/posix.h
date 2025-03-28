@@ -96,9 +96,11 @@ typedef struct {
 	void   *priv;     	/* For use by drivers */
 } px4_pollfd_struct_t;
 
-#ifndef POLLIN
-#define POLLIN       (0x01)
-#endif
+#include <poll.h>
+
+// #ifndef POLLIN
+// #define POLLIN       (0x01)
+// #endif
 
 #if defined(__PX4_QURT)
 // Qurt has no fsync implementation so need to declare one here

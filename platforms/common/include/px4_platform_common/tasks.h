@@ -52,9 +52,9 @@ typedef int px4_task_t;
 
 /** Default scheduler type */
 #if CONFIG_RR_INTERVAL > 0
-# define SCHED_DEFAULT  SCHED_RR
+# define SCHED_DEFAULT  LW_OPTION_SCHED_RR
 #else
-# define SCHED_DEFAULT  SCHED_FIFO
+# define SCHED_DEFAULT  LW_OPTION_SCHED_FIFO
 #endif
 
 #define px4_task_exit(x) _exit(x)
@@ -65,13 +65,13 @@ typedef int px4_task_t;
 #include <sched.h>
 
 /** Default scheduler type */
-#define SCHED_DEFAULT	SCHED_FIFO
+#define SCHED_DEFAULT	LW_OPTION_SCHED_FIFO
 
 #if defined(__PX4_LINUX) || defined(__PX4_DARWIN) || defined(__PX4_CYGWIN) || defined(__PX4_ROS2)
 
-#define SCHED_PRIORITY_MAX sched_get_priority_max(SCHED_FIFO)
-#define SCHED_PRIORITY_MIN sched_get_priority_min(SCHED_FIFO)
-#define SCHED_PRIORITY_DEFAULT (((sched_get_priority_max(SCHED_FIFO) - sched_get_priority_min(SCHED_FIFO)) / 2) + sched_get_priority_min(SCHED_FIFO))
+#define SCHED_PRIORITY_MAX sched_get_priority_max(LW_OPTION_SCHED_FIFO)
+#define SCHED_PRIORITY_MIN sched_get_priority_min(LW_OPTION_SCHED_FIFO)
+#define SCHED_PRIORITY_DEFAULT (((sched_get_priority_max(LW_OPTION_SCHED_FIFO) - sched_get_priority_min(LW_OPTION_SCHED_FIFO)) / 2) + sched_get_priority_min(LW_OPTION_SCHED_FIFO))
 
 #elif defined(__PX4_QURT)
 
@@ -84,7 +84,8 @@ typedef int px4_task_t;
 #endif
 
 #if defined (__PX4_LINUX)
-#include <sys/prctl.h>
+// #include <sys/prctl.h>
+#define PR_SET_NAME	1
 #else
 #define PR_SET_NAME	1
 #endif

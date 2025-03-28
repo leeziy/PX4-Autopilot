@@ -120,7 +120,7 @@ int SITL_MAIN(int argc, char **argv);
 
 int SITL_MAIN(int argc, char **argv)
 #else
-int main(int argc, char **argv)
+__EXPORT int main(int argc, char **argv)
 #endif
 {
 	bool is_client = false;
@@ -157,7 +157,8 @@ int main(int argc, char **argv)
 			argc -= 2;
 
 			for (int i = 1; i < argc; ++i) {
-				argv[i] = argv[i + 2];
+				// argv[i] = argv[i + 2];
+				strcpy(argv[i], argv[i+2]);
 			}
 		}
 
@@ -176,7 +177,10 @@ int main(int argc, char **argv)
 		}
 
 		/* Remove the path and prefix. */
-		argv[0] += path_length + strlen(prefix);
+		// argv[0] += path_length + strlen(prefix);
+		char *prog_name = argv[0] + path_length + strlen(prefix);
+		strcpy(argv[0], prog_name);
+
 
 		px4_daemon::Client client(instance);
 		return client.process_args(argc, (const char **)argv);
@@ -546,45 +550,46 @@ std::string get_absolute_binary_path(const std::string &argv0)
 int run_startup_script(const std::string &commands_file, const std::string &absolute_binary_path,
 		       int instance)
 {
-	std::string shell_command("/bin/sh ");
+	std::string shell_command("shfile ");
 
-	shell_command += commands_file + ' ' + std::to_string(instance);
+	shell_command += commands_file + " &";
+	// shell_command += commands_file + ' ' + std::to_string(instance);
 
 	// Update the PATH variable to include the absolute_binary_path
 	// (required for the px4-alias.sh script and px4-* commands).
 	// They must be within the same directory as the px4 binary
-	const char *path_variable = "PATH";
-	std::string updated_path = absolute_binary_path;
-	const char *path = getenv(path_variable);
+	// const char *path_variable = "PATH";
+	// std::string updated_path = absolute_binary_path;
+	// const char *path = getenv(path_variable);
 
-	if (path) {
-		std::string spath = path;
+	// if (path) {
+	// 	std::string spath = path;
 
-		// Check if absolute_binary_path already in PATH
-		bool already_in_path = false;
-		std::size_t current, previous = 0;
-		current = spath.find(':');
+	// 	// Check if absolute_binary_path already in PATH
+	// 	bool already_in_path = false;
+	// 	std::size_t current, previous = 0;
+	// 	current = spath.find(':');
 
-		while (current != std::string::npos) {
-			if (spath.substr(previous, current - previous) == absolute_binary_path) {
-				already_in_path = true;
-			}
+	// 	while (current != std::string::npos) {
+	// 		if (spath.substr(previous, current - previous) == absolute_binary_path) {
+	// 			already_in_path = true;
+	// 		}
 
-			previous = current + 1;
-			current = spath.find(':', previous);
-		}
+	// 		previous = current + 1;
+	// 		current = spath.find(':', previous);
+	// 	}
 
-		if (spath.substr(previous, current - previous) == absolute_binary_path) {
-			already_in_path = true;
-		}
+	// 	if (spath.substr(previous, current - previous) == absolute_binary_path) {
+	// 		already_in_path = true;
+	// 	}
 
-		if (!already_in_path) {
-			// Prepend to path to prioritize PX4 commands over potentially already installed PX4 commands.
-			updated_path = updated_path + ":" + path;
-			setenv(path_variable, updated_path.c_str(), 1);
-		}
-	}
+	// 	if (!already_in_path) {
+	// 		// Prepend to path to prioritize PX4 commands over potentially already installed PX4 commands.
+	// 		updated_path = updated_path + ":" + path;
+	// 		setenv(path_variable, updated_path.c_str(), 1);
 
+	// 	}
+	// }
 
 	PX4_INFO("startup script: %s", shell_command.c_str());
 

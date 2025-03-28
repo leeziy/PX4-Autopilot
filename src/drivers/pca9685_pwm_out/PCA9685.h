@@ -127,7 +127,7 @@ public:
 
 	uint16_t inline calcRawFromPulse(uint16_t pulse_width)
 	{
-		return (uint16_t)roundl((pulse_width * currentFreq * PCA9685_PWM_RES / (float)1e6));
+		return (uint16_t)round((pulse_width * currentFreq * PCA9685_PWM_RES / (float)1e6));
 	}
 
 	/*
