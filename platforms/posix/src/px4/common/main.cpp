@@ -136,7 +136,7 @@ __EXPORT int main(int argc, char **argv)
 	int ret = PX4_OK;
 	int instance = 0;
 
-	if (argc > 0) {
+if (argc > 0) {
 		/* The executed binary name could start with a path, so strip it away */
 		const std::string full_binary_name = argv[0];
 		const std::string binary_name = file_basename(full_binary_name);
@@ -151,18 +151,6 @@ __EXPORT int main(int argc, char **argv)
 	}
 
 	if (is_client) {
-		if (argc >= 3 && strcmp(argv[1], "--instance") == 0) {
-			instance = strtoul(argv[2], nullptr, 10);
-			/* update argv so that "--instance <instance>" is not visible anymore */
-			argc -= 2;
-
-			for (int i = 1; i < argc; ++i) {
-				// argv[i] = argv[i + 2];
-				strcpy(argv[i], argv[i+2]);
-			}
-		}
-
-		PX4_DEBUG("instance: %i", instance);
 
 		ret = get_server_running(instance, &server_is_running);
 
@@ -178,11 +166,12 @@ __EXPORT int main(int argc, char **argv)
 
 		/* Remove the path and prefix. */
 		// argv[0] += path_length + strlen(prefix);
+
 		char *prog_name = argv[0] + path_length + strlen(prefix);
 		strcpy(argv[0], prog_name);
 
-
 		px4_daemon::Client client(instance);
+		PX4_INFO("%s %s", argv[0], argv[1]);
 		return client.process_args(argc, (const char **)argv);
 
 	} else {
