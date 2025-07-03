@@ -50,6 +50,9 @@ export AUTOPILOT_HOST=hostname
 export AUTOPILOT_USER=username
 make firefly_rk3588s_arm64
 make firefly_rk3588s_arm64 upload
+DONT_RUN=1 make px4_sitl_default gazebo-classic
+make firefly_rk3588s_x64
+make firefly_rk3588s_hitl
 ```
 ### 2.3 运行PX4
 初次启动
