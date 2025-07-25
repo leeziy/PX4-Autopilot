@@ -50,10 +50,10 @@ namespace wq_configurations
 {
 static constexpr wq_config_t rate_ctrl{"wq:rate_ctrl", 3150, 0}; // PX4 inner loop highest priority
 // Thread exclusive
-static constexpr wq_config_t control_allocator{"wq:control_allocator", 3150, 0};
-static constexpr wq_config_t mc_rate_control{"wq:mc_rate_control", 3150, 0};
+static constexpr wq_config_t control_allocator{"wq:ctl_alloc", 3150, 0};
+static constexpr wq_config_t mc_rate_control{"wq:mc_rate_ctl", 3150, 0};
 static constexpr wq_config_t pwm_out_sim{"wq:pwm_out_sim", 3150, 0};
-static constexpr wq_config_t vehicle_angular_velocity{"wq:vehicle_angular_velocity", 3150, 0};
+static constexpr wq_config_t vehicle_angular_velocity{"wq:vehicle_rate", 3150, 0};
 //
 
 static constexpr wq_config_t SPI0{"wq:SPI0", 2392, -1};
