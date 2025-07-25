@@ -49,6 +49,12 @@ struct wq_config_t {
 namespace wq_configurations
 {
 static constexpr wq_config_t rate_ctrl{"wq:rate_ctrl", 3150, 0}; // PX4 inner loop highest priority
+// Thread exclusive
+static constexpr wq_config_t control_allocator{"wq:control_allocator", 3150, 0};
+static constexpr wq_config_t mc_rate_control{"wq:mc_rate_control", 3150, 0};
+static constexpr wq_config_t pwm_output_sim{"wq:pwm_output_sim", 3150, 0};
+static constexpr wq_config_t vehicle_angular_velocity{"wq:vehicle_angular_velocity", 3150, 0};
+//
 
 static constexpr wq_config_t SPI0{"wq:SPI0", 2392, -1};
 static constexpr wq_config_t SPI1{"wq:SPI1", 2392, -2};
@@ -66,13 +72,33 @@ static constexpr wq_config_t I2C4{"wq:I2C4", 2336, -12};
 
 // PX4 att/pos controllers, highest priority after sensors.
 static constexpr wq_config_t nav_and_controllers{"wq:nav_and_controllers", 2240, -13};
+// Thread exclusive
+static constexpr wq_config_t flight_mode_manager{"wq:flight_mode_manager", 2240, -13};
+static constexpr wq_config_t land_detector{"wq:land_detector", 2240, -13};
+static constexpr wq_config_t mc_att_control{"wq:mc_att_control", 2240, -13};
+static constexpr wq_config_t mc_hover_thrust_estimator{"wq:mc_hover_thrust_estimator", 2240, -13};
+static constexpr wq_config_t mc_pos_control{"wq:mc_pos_control", 2240, -13};
+static constexpr wq_config_t sensors{"wq:sensors", 2240, -13};
+static constexpr wq_config_t vehicle_acceleration{"wq:vehicle_acceleration", 2240, -13};
+static constexpr wq_config_t vehicle_air_data{"wq:vehicle_air_data", 2240, -13};
+static constexpr wq_config_t vehicle_magnetometer{"wq:vehicle_magnetometer", 2240, -13};
+//
 
 static constexpr wq_config_t INS0{"wq:INS0", 6000, -14};
+// Thread exclusive
+static constexpr wq_config_t ekf2{"wq:ekf2", 6000, -14};
+static constexpr wq_config_t vehicle_imu{"wq:vehicle_imu", 6000, -14};
+//
 static constexpr wq_config_t INS1{"wq:INS1", 6000, -15};
 static constexpr wq_config_t INS2{"wq:INS2", 6000, -16};
 static constexpr wq_config_t INS3{"wq:INS3", 6000, -17};
 
 static constexpr wq_config_t hp_default{"wq:hp_default", 2800, -18};
+// Thread exclusive
+static constexpr wq_config_t battery_status{"wq:battery_status", 2800, -18};
+static constexpr wq_config_t manual_control{"wq:manual_control", 2800, -18};
+static constexpr wq_config_t rc_update{"wq:rc_update", 2800, -18};
+//
 
 static constexpr wq_config_t uavcan{"wq:uavcan", 3624, -19};
 
@@ -90,6 +116,9 @@ static constexpr wq_config_t ttyACM0{"wq:ttyACM0", 1728, -31};
 static constexpr wq_config_t ttyUnknown{"wq:ttyUnknown", 1728, -32};
 
 static constexpr wq_config_t lp_default{"wq:lp_default", 1920, -50};
+// Thread exclusive
+static constexpr wq_config_t parameters{"wq:parameters", 1920, -50};
+//
 
 static constexpr wq_config_t test1{"wq:test1", 2000, 0};
 static constexpr wq_config_t test2{"wq:test2", 2000, 0};
