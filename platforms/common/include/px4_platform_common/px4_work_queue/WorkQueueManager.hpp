@@ -73,15 +73,15 @@ static constexpr wq_config_t I2C4{"wq:I2C4", 2336, -12};
 // PX4 att/pos controllers, highest priority after sensors.
 static constexpr wq_config_t nav_and_controllers{"wq:nav_and_controllers", 2240, -13};
 // Thread exclusive
-static constexpr wq_config_t flight_mode_manager{"wq:flight_mode_manager", 2240, -13};
-static constexpr wq_config_t land_detector{"wq:land_detector", 2240, -13};
-static constexpr wq_config_t mc_att_control{"wq:mc_att_control", 2240, -13};
-static constexpr wq_config_t mc_hover_thrust_estimator{"wq:mc_hover_thrust_estimator", 2240, -13};
-static constexpr wq_config_t mc_pos_control{"wq:mc_pos_control", 2240, -13};
+static constexpr wq_config_t flight_mode_manager{"wq:flt_mod_man", 2240, -13};
+static constexpr wq_config_t land_detector{"wq:land_det", 2240, -13};
+static constexpr wq_config_t mc_att_control{"wq:mc_att_ctl", 2240, -13};
+static constexpr wq_config_t mc_hover_thrust_estimator{"wq:mc_hover_est", 2240, -13};
+static constexpr wq_config_t mc_pos_control{"wq:mc_pos_ctl", 2240, -13};
 static constexpr wq_config_t sensors{"wq:sensors", 2240, -13};
-static constexpr wq_config_t vehicle_acceleration{"wq:vehicle_acceleration", 2240, -13};
-static constexpr wq_config_t vehicle_air_data{"wq:vehicle_air_data", 2240, -13};
-static constexpr wq_config_t vehicle_magnetometer{"wq:vehicle_magnetometer", 2240, -13};
+static constexpr wq_config_t vehicle_acceleration{"wq:vehicle_acc", 2240, -13};
+static constexpr wq_config_t vehicle_air_data{"wq:vehicle_air", 2240, -13};
+static constexpr wq_config_t vehicle_magnetometer{"wq:vehicle_mag", 2240, -13};
 //
 
 static constexpr wq_config_t INS0{"wq:INS0", 6000, -14};
