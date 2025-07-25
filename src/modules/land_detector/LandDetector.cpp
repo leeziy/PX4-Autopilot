@@ -47,7 +47,7 @@ namespace land_detector
 
 LandDetector::LandDetector() :
 	ModuleParams(nullptr),
-	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::nav_and_controllers)
+	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::land_detector)
 {
 	_land_detected.ground_contact = true;
 	_land_detected.maybe_landed = true;

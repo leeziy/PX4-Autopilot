@@ -51,7 +51,7 @@ using namespace time_literals;
 
 ControlAllocator::ControlAllocator() :
 	ModuleParams(nullptr),
-	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::rate_ctrl),
+	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::control_allocator),
 	_loop_perf(perf_alloc(PC_ELAPSED, MODULE_NAME": cycle"))
 {
 	_control_allocator_status_pub[0].advertise();

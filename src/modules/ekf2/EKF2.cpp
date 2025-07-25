@@ -2853,7 +2853,7 @@ int EKF2::task_spawn(int argc, char *argv[])
 
 	{
 		// otherwise launch regular
-		EKF2 *ekf2_inst = new EKF2(false, px4::wq_configurations::INS0, replay_mode);
+		EKF2 *ekf2_inst = new EKF2(false, px4::wq_configurations::ekf2, replay_mode);
 
 		if (ekf2_inst) {
 			_objects[0].store(ekf2_inst);

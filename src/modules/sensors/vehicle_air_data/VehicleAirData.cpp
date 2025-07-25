@@ -49,7 +49,7 @@ static constexpr uint32_t SENSOR_TIMEOUT{300_ms};
 
 VehicleAirData::VehicleAirData() :
 	ModuleParams(nullptr),
-	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::nav_and_controllers)
+	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::vehicle_air_data)
 {
 	_vehicle_air_data_pub.advertise();
 

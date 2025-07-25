@@ -44,7 +44,7 @@ using namespace matrix;
 MulticopterPositionControl::MulticopterPositionControl(bool vtol) :
 	SuperBlock(nullptr, "MPC"),
 	ModuleParams(nullptr),
-	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::nav_and_controllers),
+	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::mc_pos_control),
 	_vehicle_attitude_setpoint_pub(vtol ? ORB_ID(mc_virtual_attitude_setpoint) : ORB_ID(vehicle_attitude_setpoint)),
 	_vel_x_deriv(this, "VELD"),
 	_vel_y_deriv(this, "VELD"),

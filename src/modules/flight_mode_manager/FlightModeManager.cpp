@@ -40,7 +40,7 @@ using namespace time_literals;
 
 FlightModeManager::FlightModeManager() :
 	ModuleParams(nullptr),
-	WorkItem(MODULE_NAME, px4::wq_configurations::nav_and_controllers)
+	WorkItem(MODULE_NAME, px4::wq_configurations::flight_mode_manager)
 {
 	updateParams();
 

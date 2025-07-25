@@ -47,7 +47,7 @@ static constexpr uint32_t SENSOR_TIMEOUT{300_ms};
 
 VehicleMagnetometer::VehicleMagnetometer() :
 	ModuleParams(nullptr),
-	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::nav_and_controllers)
+	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::vehicle_magnetometer)
 {
 	param_find("SENS_MAG_SIDES");
 	param_find("SENS_MAG_AUTOROT");

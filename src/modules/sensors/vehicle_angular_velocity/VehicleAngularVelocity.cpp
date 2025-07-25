@@ -44,7 +44,7 @@ namespace sensors
 
 VehicleAngularVelocity::VehicleAngularVelocity() :
 	ModuleParams(nullptr),
-	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::rate_ctrl)
+	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::vehicle_angular_velocity)
 {
 	_vehicle_angular_velocity_pub.advertise();
 }

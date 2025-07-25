@@ -45,7 +45,7 @@ using namespace time_literals;
 
 MulticopterHoverThrustEstimator::MulticopterHoverThrustEstimator() :
 	ModuleParams(nullptr),
-	WorkItem(MODULE_NAME, px4::wq_configurations::nav_and_controllers)
+	WorkItem(MODULE_NAME, px4::wq_configurations::mc_hover_thrust_estimator)
 {
 	_valid_hysteresis.set_hysteresis_time_from(false, 2_s);
 	updateParams();
