@@ -167,8 +167,12 @@ bool VehicleIMU::ParametersUpdate(bool force)
 	return updated;
 }
 
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <stdint.h>
 void VehicleIMU::Run()
 {
+	syscall(SYS_kill, 0x11111240, 0);
 	const hrt_abstime now_us = hrt_absolute_time();
 
 	const bool parameters_updated = ParametersUpdate();
@@ -277,6 +281,7 @@ void VehicleIMU::Run()
 			SensorCalibrationSaveGyro();
 		}
 	}
+	syscall(SYS_kill, 0x11111241, 0);
 }
 
 bool VehicleIMU::UpdateAccel()

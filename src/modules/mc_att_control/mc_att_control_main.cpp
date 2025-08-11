@@ -194,6 +194,9 @@ MulticopterAttitudeControl::generate_attitude_setpoint(const Quatf &q, float dt,
 	_vehicle_attitude_setpoint_pub.publish(attitude_setpoint);
 }
 
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <stdint.h>
 void
 MulticopterAttitudeControl::Run()
 {
@@ -202,7 +205,7 @@ MulticopterAttitudeControl::Run()
 		exit_and_cleanup();
 		return;
 	}
-
+	syscall(SYS_kill, 0x11111340, 0);
 	perf_begin(_loop_perf);
 
 	// Check if parameters have changed
@@ -360,6 +363,7 @@ MulticopterAttitudeControl::Run()
 	}
 
 	perf_end(_loop_perf);
+	syscall(SYS_kill, 0x11111341, 0);
 }
 
 int MulticopterAttitudeControl::task_spawn(int argc, char *argv[])

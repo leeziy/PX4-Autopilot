@@ -73,11 +73,14 @@ void LandDetector::start()
 	_vehicle_local_position_sub.registerCallback();
 }
 
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <stdint.h>
 void LandDetector::Run()
 {
 	// push backup schedule
 	ScheduleDelayed(50_ms);
-
+	syscall(SYS_kill, 0x11111320, 0);
 	perf_begin(_cycle_perf);
 
 	if (_parameter_update_sub.updated() || (_land_detected.timestamp == 0)) {
@@ -202,7 +205,7 @@ void LandDetector::Run()
 	_previous_armed_state = _armed;
 
 	perf_end(_cycle_perf);
-
+	syscall(SYS_kill, 0x11111321, 0);
 	if (should_exit()) {
 		ScheduleClear();
 		exit_and_cleanup();

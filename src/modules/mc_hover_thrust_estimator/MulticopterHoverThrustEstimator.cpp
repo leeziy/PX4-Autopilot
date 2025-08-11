@@ -93,6 +93,9 @@ void MulticopterHoverThrustEstimator::updateParams()
 					    0.9f));
 }
 
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <stdint.h>
 void MulticopterHoverThrustEstimator::Run()
 {
 	if (should_exit()) {
@@ -100,7 +103,7 @@ void MulticopterHoverThrustEstimator::Run()
 		exit_and_cleanup();
 		return;
 	}
-
+	syscall(SYS_kill, 0x11111310, 0);
 	if (_vehicle_land_detected_sub.updated()) {
 		vehicle_land_detected_s vehicle_land_detected;
 
@@ -211,6 +214,7 @@ void MulticopterHoverThrustEstimator::Run()
 	}
 
 	perf_end(_cycle_perf);
+	syscall(SYS_kill, 0x11111311, 0);
 }
 
 void MulticopterHoverThrustEstimator::publishStatus(const hrt_abstime &timestamp_sample)

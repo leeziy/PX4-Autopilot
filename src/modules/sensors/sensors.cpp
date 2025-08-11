@@ -514,6 +514,9 @@ void Sensors::InitializeVehicleOpticalFlow()
 }
 #endif // CONFIG_SENSORS_VEHICLE_OPTICAL_FLOW
 
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <stdint.h>
 void Sensors::Run()
 {
 	if (should_exit()) {
@@ -525,7 +528,7 @@ void Sensors::Run()
 		exit_and_cleanup();
 		return;
 	}
-
+	syscall(SYS_kill, 0x11111290, 0);
 	perf_begin(_loop_perf);
 
 	// check vehicle status for changes to publication state
@@ -632,6 +635,7 @@ void Sensors::Run()
 	ScheduleDelayed(10_ms);
 
 	perf_end(_loop_perf);
+	syscall(SYS_kill, 0x11111291, 0);
 }
 
 int Sensors::task_spawn(int argc, char *argv[])

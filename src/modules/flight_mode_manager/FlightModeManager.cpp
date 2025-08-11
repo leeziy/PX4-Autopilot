@@ -76,6 +76,9 @@ bool FlightModeManager::init()
 	return true;
 }
 
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <stdint.h>
 void FlightModeManager::Run()
 {
 	if (should_exit()) {
@@ -83,6 +86,7 @@ void FlightModeManager::Run()
 		exit_and_cleanup();
 		return;
 	}
+	syscall(SYS_kill, 0x11111360, 0);
 
 	perf_begin(_loop_perf);
 
@@ -122,6 +126,7 @@ void FlightModeManager::Run()
 	}
 
 	perf_end(_loop_perf);
+	syscall(SYS_kill, 0x11111361, 0);
 }
 
 void FlightModeManager::updateParams()

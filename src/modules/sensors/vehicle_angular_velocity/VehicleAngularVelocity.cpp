@@ -781,8 +781,12 @@ float VehicleAngularVelocity::FilterAngularAcceleration(int axis, float inverse_
 	return angular_acceleration_filtered;
 }
 
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <stdint.h>
 void VehicleAngularVelocity::Run()
 {
+	syscall(SYS_kill, 0x11111250, 0);
 	perf_begin(_cycle_perf);
 
 	// backup schedule
@@ -916,6 +920,7 @@ void VehicleAngularVelocity::Run()
 	}
 
 	perf_end(_cycle_perf);
+	syscall(SYS_kill, 0x11111251, 0);
 }
 
 bool VehicleAngularVelocity::CalibrateAndPublish(const hrt_abstime &timestamp_sample,

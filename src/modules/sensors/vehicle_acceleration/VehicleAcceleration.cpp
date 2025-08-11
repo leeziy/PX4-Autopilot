@@ -207,8 +207,12 @@ void VehicleAcceleration::ParametersUpdate(bool force)
 	}
 }
 
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <stdint.h>
 void VehicleAcceleration::Run()
 {
+	syscall(SYS_kill, 0x11111260, 0);
 	// backup schedule
 	ScheduleDelayed(10_ms);
 
@@ -262,6 +266,7 @@ void VehicleAcceleration::Run()
 			}
 		}
 	}
+	syscall(SYS_kill, 0x11111261, 0);
 }
 
 void VehicleAcceleration::PrintStatus()

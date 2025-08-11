@@ -415,8 +415,12 @@ void VehicleMagnetometer::UpdatePowerCompensation()
 	}
 }
 
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <stdint.h>
 void VehicleMagnetometer::Run()
 {
+	syscall(SYS_kill, 0x11111270, 0);
 	perf_begin(_cycle_perf);
 
 	const hrt_abstime time_now_us = hrt_absolute_time();
@@ -607,6 +611,7 @@ void VehicleMagnetometer::Run()
 	ScheduleDelayed(50_ms);
 
 	perf_end(_cycle_perf);
+	syscall(SYS_kill, 0x11111271, 0);
 }
 
 void VehicleMagnetometer::CheckFailover(const hrt_abstime &time_now_us)

@@ -330,6 +330,9 @@ PositionControlStates MulticopterPositionControl::set_vehicle_states(const vehic
 	return states;
 }
 
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <stdint.h>
 void MulticopterPositionControl::Run()
 {
 	if (should_exit()) {
@@ -337,7 +340,7 @@ void MulticopterPositionControl::Run()
 		exit_and_cleanup();
 		return;
 	}
-
+	syscall(SYS_kill, 0x11111350, 0);
 	// reschedule backup
 	ScheduleDelayed(100_ms);
 
@@ -557,6 +560,7 @@ void MulticopterPositionControl::Run()
 	}
 
 	perf_end(_cycle_perf);
+	syscall(SYS_kill, 0x11111351, 0);
 }
 
 trajectory_setpoint_s MulticopterPositionControl::generateFailsafeSetpoint(const hrt_abstime &now,

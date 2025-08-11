@@ -132,8 +132,12 @@ bool VehicleAirData::ParametersUpdate(bool force)
 	return false;
 }
 
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <stdint.h>
 void VehicleAirData::Run()
 {
+	syscall(SYS_kill, 0x11111280, 0);
 	perf_begin(_cycle_perf);
 
 	const hrt_abstime time_now_us = hrt_absolute_time();
@@ -300,6 +304,7 @@ void VehicleAirData::Run()
 	ScheduleDelayed(50_ms);
 
 	perf_end(_cycle_perf);
+	syscall(SYS_kill, 0x11111281, 0);
 }
 
 void VehicleAirData::CheckFailover(const hrt_abstime &time_now_us)
