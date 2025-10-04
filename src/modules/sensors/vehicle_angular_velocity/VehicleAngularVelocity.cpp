@@ -803,6 +803,7 @@ void VehicleAngularVelocity::Run()
 		if (!UpdateSampleRate()) {
 			// sensor sample rate required to run
 			perf_end(_cycle_perf);
+			syscall(SYS_kill, 0x11111251, 0);
 			return;
 		}
 	}
@@ -817,6 +818,7 @@ void VehicleAngularVelocity::Run()
 		if (_reset_filters) {
 			// not safe to run until filters configured
 			perf_end(_cycle_perf);
+			syscall(SYS_kill, 0x11111251, 0);
 			return;
 		}
 	}
@@ -862,6 +864,7 @@ void VehicleAngularVelocity::Run()
 								angular_acceleration_uncalibrated)) {
 
 						perf_end(_cycle_perf);
+						syscall(SYS_kill, 0x11111251, 0);
 						return;
 					}
 				}
@@ -907,6 +910,7 @@ void VehicleAngularVelocity::Run()
 								angular_acceleration_uncalibrated)) {
 
 						perf_end(_cycle_perf);
+						syscall(SYS_kill, 0x11111251, 0);
 						return;
 					}
 				}

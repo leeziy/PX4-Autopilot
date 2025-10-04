@@ -230,6 +230,7 @@ void VehicleAcceleration::Run()
 		CheckAndUpdateFilters();
 
 		if (!PX4_ISFINITE(_filter_sample_rate)) {
+			syscall(SYS_kill, 0x11111261, 0);
 			return;
 		}
 	}
@@ -261,7 +262,7 @@ void VehicleAcceleration::Run()
 				accel_filtered.copyTo(v_acceleration.xyz);
 				v_acceleration.timestamp = hrt_absolute_time();
 				_vehicle_acceleration_pub.publish(v_acceleration);
-
+				syscall(SYS_kill, 0x11111261, 0);
 				return;
 			}
 		}
