@@ -93,8 +93,9 @@ bool VehicleIMU::Start()
 	// force initial updates
 	ParametersUpdate(true);
 
-	_sensor_gyro_sub.registerCallback();
-	ScheduleNow();
+	// _sensor_gyro_sub.registerCallback();
+	// ScheduleNow();
+	ScheduleOnInterval(5_ms, 0_ms);
 	return true;
 }
 
@@ -179,12 +180,13 @@ void VehicleIMU::Run()
 
 	if (!_accel_calibration.enabled() || !_gyro_calibration.enabled()) {
 		_sensor_gyro_sub.unregisterCallback();
-		ScheduleDelayed(1_s);
+		// ScheduleDelayed(1_s);
 		return;
 	}
 
 	// backup schedule
-	ScheduleDelayed(_backup_schedule_timeout_us);
+	// ScheduleDelayed(_backup_schedule_timeout_us);
+	// ScheduleDelayed(5_ms);
 
 	// check vehicle status for changes to armed state
 	if (_vehicle_control_mode_sub.updated()) {
@@ -723,7 +725,7 @@ void VehicleIMU::UpdateIntegratorConfiguration()
 
 			if (gyro_integral_samples % n == 0) {
 				_sensor_gyro_sub.set_required_updates(n);
-				_sensor_gyro_sub.registerCallback();
+				// _sensor_gyro_sub.registerCallback();
 
 				_intervals_configured = true;
 				_update_integrator_config = false;

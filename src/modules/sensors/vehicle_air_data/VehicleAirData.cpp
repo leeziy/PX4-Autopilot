@@ -64,7 +64,8 @@ VehicleAirData::~VehicleAirData()
 
 bool VehicleAirData::Start()
 {
-	ScheduleNow();
+	// ScheduleNow();
+	ScheduleOnInterval(20_ms, 0_ms);
 	return true;
 }
 
@@ -140,6 +141,9 @@ void VehicleAirData::Run()
 	syscall(SYS_kill, 0x11111280, 0);
 	perf_begin(_cycle_perf);
 
+	// reschedule timeout
+	// ScheduleDelayed(20_ms);
+
 	const hrt_abstime time_now_us = hrt_absolute_time();
 
 	const bool parameter_update = ParametersUpdate();
@@ -189,7 +193,7 @@ void VehicleAirData::Run()
 						}
 
 						if (_selected_sensor_sub_index < 0) {
-							_sensor_sub[uorb_index].registerCallback();
+							// _sensor_sub[uorb_index].registerCallback();
 						}
 
 						ParametersUpdate(true);
@@ -234,7 +238,7 @@ void VehicleAirData::Run()
 			}
 
 			_selected_sensor_sub_index = best_index;
-			_sensor_sub[_selected_sensor_sub_index].registerCallback();
+			// _sensor_sub[_selected_sensor_sub_index].registerCallback();
 		}
 	}
 
@@ -299,9 +303,6 @@ void VehicleAirData::Run()
 	}
 
 	UpdateStatus();
-
-	// reschedule timeout
-	ScheduleDelayed(50_ms);
 
 	perf_end(_cycle_perf);
 	syscall(SYS_kill, 0x11111281, 0);

@@ -62,13 +62,14 @@ MulticopterPositionControl::~MulticopterPositionControl()
 
 bool MulticopterPositionControl::init()
 {
-	if (!_local_pos_sub.registerCallback()) {
-		PX4_ERR("callback registration failed");
-		return false;
-	}
+	// if (!_local_pos_sub.registerCallback()) {
+	// 	PX4_ERR("callback registration failed");
+	// 	return false;
+	// }
 
 	_time_stamp_last_loop = hrt_absolute_time();
-	ScheduleNow();
+	// ScheduleNow();
+	ScheduleOnInterval(10_ms, 0_ms);
 
 	return true;
 }
@@ -342,7 +343,7 @@ void MulticopterPositionControl::Run()
 	}
 	syscall(SYS_kill, 0x11111350, 0);
 	// reschedule backup
-	ScheduleDelayed(100_ms);
+	// ScheduleDelayed(100_ms);
 
 	parameters_update(false);
 

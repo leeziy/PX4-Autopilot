@@ -90,18 +90,19 @@ ControlAllocator::~ControlAllocator()
 bool
 ControlAllocator::init()
 {
-	if (!_vehicle_torque_setpoint_sub.registerCallback()) {
-		PX4_ERR("callback registration failed");
-		return false;
-	}
+	// if (!_vehicle_torque_setpoint_sub.registerCallback()) {
+	// 	PX4_ERR("callback registration failed");
+	// 	return false;
+	// }
 
-	if (!_vehicle_thrust_setpoint_sub.registerCallback()) {
-		PX4_ERR("callback registration failed");
-		return false;
-	}
+	// if (!_vehicle_thrust_setpoint_sub.registerCallback()) {
+	// 	PX4_ERR("callback registration failed");
+	// 	return false;
+	// }
 
 #ifndef ENABLE_LOCKSTEP_SCHEDULER // Backup schedule would interfere with lockstep
-	ScheduleDelayed(50_ms);
+	// ScheduleDelayed(50_ms);
+	ScheduleOnInterval(5_ms, 0_ms);
 #endif
 
 	return true;
@@ -313,7 +314,7 @@ ControlAllocator::Run()
 
 #ifndef ENABLE_LOCKSTEP_SCHEDULER // Backup schedule would interfere with lockstep
 	// Push backup schedule
-	ScheduleDelayed(50_ms);
+	// ScheduleDelayed(50_ms);
 #endif
 
 	// Check if parameters have changed

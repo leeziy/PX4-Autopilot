@@ -80,7 +80,8 @@ VehicleMagnetometer::~VehicleMagnetometer()
 
 bool VehicleMagnetometer::Start()
 {
-	ScheduleNow();
+	// ScheduleNow();
+	ScheduleOnInterval(20_ms, 0_ms);
 	return true;
 }
 
@@ -423,6 +424,9 @@ void VehicleMagnetometer::Run()
 	syscall(SYS_kill, 0x11111270, 0);
 	perf_begin(_cycle_perf);
 
+	// reschedule timeout
+	// ScheduleDelayed(20_ms);
+
 	const hrt_abstime time_now_us = hrt_absolute_time();
 
 	const bool parameter_update = ParametersUpdate();
@@ -487,7 +491,7 @@ void VehicleMagnetometer::Run()
 						}
 
 						if (_selected_sensor_sub_index < 0) {
-							_sensor_sub[uorb_index].registerCallback();
+							// _sensor_sub[uorb_index].registerCallback();
 						}
 
 						ParametersUpdate(true);
@@ -530,7 +534,7 @@ void VehicleMagnetometer::Run()
 			}
 
 			_selected_sensor_sub_index = best_index;
-			_sensor_sub[_selected_sensor_sub_index].registerCallback();
+			// _sensor_sub[_selected_sensor_sub_index].registerCallback();
 		}
 	}
 
@@ -606,9 +610,6 @@ void VehicleMagnetometer::Run()
 	UpdateMagCalibration();
 
 	UpdateStatus();
-
-	// reschedule timeout
-	ScheduleDelayed(50_ms);
 
 	perf_end(_cycle_perf);
 	syscall(SYS_kill, 0x11111271, 0);

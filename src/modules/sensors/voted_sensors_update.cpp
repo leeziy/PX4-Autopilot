@@ -260,7 +260,7 @@ void VotedSensorsUpdate::imuPoll(struct sensor_combined_s &raw)
 
 				if (_vehicle_imu_sub[i].copy(&report)) {
 					if ((report.gyro_device_id != 0) && (report.gyro_device_id == _gyro_device_id[gyro_best_index])) {
-						_vehicle_imu_sub[i].registerCallback();
+						// _vehicle_imu_sub[i].registerCallback();
 					}
 				}
 			}

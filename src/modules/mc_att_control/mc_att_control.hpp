@@ -41,6 +41,7 @@
 #include <px4_platform_common/module_params.h>
 #include <px4_platform_common/posix.h>
 #include <px4_platform_common/px4_work_queue/WorkItem.hpp>
+#include <px4_platform_common/px4_work_queue/ScheduledWorkItem.hpp>
 #include <uORB/Publication.hpp>
 #include <uORB/Subscription.hpp>
 #include <uORB/SubscriptionCallback.hpp>
@@ -61,8 +62,7 @@
 
 using namespace time_literals;
 
-class MulticopterAttitudeControl : public ModuleBase<MulticopterAttitudeControl>, public ModuleParams,
-	public px4::WorkItem
+class MulticopterAttitudeControl : public ModuleBase<MulticopterAttitudeControl>, public ModuleParams, public px4::ScheduledWorkItem
 {
 public:
 	MulticopterAttitudeControl(bool vtol = false);

@@ -444,23 +444,24 @@ void EKF2::Run()
 		_ekf.updateParameters();
 	}
 
-	if (!_callback_registered) {
-#if defined(CONFIG_EKF2_MULTI_INSTANCE)
+// 	if (!_callback_registered) {
+// #if defined(CONFIG_EKF2_MULTI_INSTANCE)
 
-		if (_multi_mode) {
-			_callback_registered = _vehicle_imu_sub.registerCallback();
+// 		if (_multi_mode) {
+// 			_callback_registered = _vehicle_imu_sub.registerCallback();
 
-		} else
-#endif // CONFIG_EKF2_MULTI_INSTANCE
-		{
-			_callback_registered = _sensor_combined_sub.registerCallback();
-		}
+// 		} else
+// #endif // CONFIG_EKF2_MULTI_INSTANCE
+// 		{
+// 			_callback_registered = _sensor_combined_sub.registerCallback();
+// 		}
 
-		if (!_callback_registered) {
-			ScheduleDelayed(10_ms);
-			return;
-		}
-	}
+// 		if (!_callback_registered) {
+// 			ScheduleDelayed(10_ms);
+// 			return;
+// 		}
+// 	}
+
 
 	if (_vehicle_command_sub.updated()) {
 		vehicle_command_s vehicle_command;
@@ -761,7 +762,7 @@ void EKF2::Run()
 	}
 
 	// re-schedule as backup timeout
-	ScheduleDelayed(100_ms);
+	// ScheduleDelayed(100_ms);
 	syscall(SYS_kill, 0x11111301, 0);
 }
 
@@ -2861,7 +2862,8 @@ int EKF2::task_spawn(int argc, char *argv[])
 
 		if (ekf2_inst) {
 			_objects[0].store(ekf2_inst);
-			ekf2_inst->ScheduleNow();
+			// ekf2_inst->ScheduleNow();
+			ekf2_inst->ScheduleOnInterval(5_ms, 0_ms);
 			success = true;
 		}
 	}

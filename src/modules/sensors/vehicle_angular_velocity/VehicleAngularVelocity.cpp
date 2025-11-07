@@ -79,10 +79,10 @@ bool VehicleAngularVelocity::Start()
 		return false;
 	}
 
-	if (!SensorSelectionUpdate(hrt_absolute_time(), true)) {
-		ScheduleNow();
-	}
-
+	// if (!SensorSelectionUpdate(hrt_absolute_time(), true)) {
+	// 	ScheduleNow();
+	// }
+	ScheduleOnInterval(5_ms, 0_ms);
 	return true;
 }
 
@@ -281,7 +281,7 @@ bool VehicleAngularVelocity::SensorSelectionUpdate(const hrt_abstime &time_now_u
 					}
 
 					if (sensor_gyro_fifo_sub.get().device_id == device_id) {
-						if (_sensor_gyro_fifo_sub.ChangeInstance(i) && _sensor_gyro_fifo_sub.registerCallback()) {
+						if (_sensor_gyro_fifo_sub.ChangeInstance(i)) {
 							// make sure non-FIFO sub is unregistered
 							_sensor_sub.unregisterCallback();
 
@@ -323,7 +323,7 @@ bool VehicleAngularVelocity::SensorSelectionUpdate(const hrt_abstime &time_now_u
 					}
 
 					if (sensor_gyro_sub.get().device_id == device_id) {
-						if (_sensor_sub.ChangeInstance(i) && _sensor_sub.registerCallback()) {
+						if (_sensor_sub.ChangeInstance(i)) {
 							// make sure FIFO sub is unregistered
 							_sensor_gyro_fifo_sub.unregisterCallback();
 
@@ -790,7 +790,7 @@ void VehicleAngularVelocity::Run()
 	perf_begin(_cycle_perf);
 
 	// backup schedule
-	ScheduleDelayed(10_ms);
+	// ScheduleDelayed(5_ms);
 
 	const hrt_abstime time_now_us = hrt_absolute_time();
 

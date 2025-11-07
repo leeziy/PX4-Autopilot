@@ -68,9 +68,10 @@ bool VehicleAcceleration::Start()
 	}
 
 	if (!SensorSelectionUpdate(true)) {
-		_sensor_sub.registerCallback();
+		// _sensor_sub.registerCallback();
 	}
-
+	// ScheduleNow();
+	ScheduleOnInterval(5_ms, 0_ms);
 	return true;
 }
 
@@ -168,7 +169,7 @@ bool VehicleAcceleration::SensorSelectionUpdate(bool force)
 				if (sensor_accel_sub.advertised() && (sensor_accel_sub.get().timestamp != 0)
 				    && (device_id != 0) && (device_id == sensor_selection.accel_device_id)) {
 
-					if (_sensor_sub.ChangeInstance(i) && _sensor_sub.registerCallback()) {
+					if (_sensor_sub.ChangeInstance(i)) {
 						PX4_DEBUG("selected sensor changed %" PRIu32 " -> %" PRIu32 "", _calibration.device_id(), device_id);
 
 						// clear bias and corrections
@@ -214,7 +215,7 @@ void VehicleAcceleration::Run()
 {
 	syscall(SYS_kill, 0x11111260, 0);
 	// backup schedule
-	ScheduleDelayed(10_ms);
+	// ScheduleDelayed(5_ms);
 
 	// update corrections first to set _selected_sensor
 	bool selection_updated = SensorSelectionUpdate();

@@ -152,8 +152,9 @@ Sensors::~Sensors()
 
 bool Sensors::init()
 {
-	_vehicle_imu_sub[0].registerCallback();
-	ScheduleNow();
+	// _vehicle_imu_sub[0].registerCallback();
+	// ScheduleNow();
+	ScheduleOnInterval(5_ms, 0_ms);
 	return true;
 }
 
@@ -530,6 +531,7 @@ void Sensors::Run()
 	}
 	syscall(SYS_kill, 0x11111290, 0);
 	perf_begin(_loop_perf);
+	// ScheduleDelayed(5_ms); // backup schedule
 
 	// check vehicle status for changes to publication state
 	if (_vcontrol_mode_sub.updated()) {
@@ -632,7 +634,7 @@ void Sensors::Run()
 #endif // CONFIG_SENSORS_VEHICLE_AIRSPEED
 
 	// backup schedule as a watchdog timeout
-	ScheduleDelayed(10_ms);
+	// ScheduleDelayed(10_ms);
 
 	perf_end(_loop_perf);
 	syscall(SYS_kill, 0x11111291, 0);

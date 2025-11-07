@@ -45,7 +45,7 @@ using namespace time_literals;
 
 MulticopterHoverThrustEstimator::MulticopterHoverThrustEstimator() :
 	ModuleParams(nullptr),
-	WorkItem(MODULE_NAME, px4::wq_configurations::mc_hover_thrust_estimator)
+	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::mc_hover_thrust_estimator)
 {
 	_valid_hysteresis.set_hysteresis_time_from(false, 2_s);
 	updateParams();
@@ -59,11 +59,11 @@ MulticopterHoverThrustEstimator::~MulticopterHoverThrustEstimator()
 
 bool MulticopterHoverThrustEstimator::init()
 {
-	if (!_vehicle_local_position_sub.registerCallback()) {
-		PX4_ERR("callback registration failed");
-		return false;
-	}
-
+	// if (!_vehicle_local_position_sub.registerCallback()) {
+	// 	PX4_ERR("callback registration failed");
+	// 	return false;
+	// }
+	ScheduleOnInterval(10_ms, 0_ms);
 	return true;
 }
 
