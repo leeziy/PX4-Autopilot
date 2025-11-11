@@ -39,6 +39,12 @@
 #include <mathlib/math/Functions.hpp>
 #include <px4_platform_common/events.h>
 
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <cerrno>
+
 using namespace matrix;
 using namespace time_literals;
 using math::radians;
@@ -58,7 +64,54 @@ MulticopterRateControl::MulticopterRateControl(bool vtol) :
 
 MulticopterRateControl::~MulticopterRateControl()
 {
+	DeinitPeriodSharedMemory();
 	perf_free(_loop_perf);
+}
+
+bool MulticopterRateControl::InitPeriodSharedMemory()
+{
+    if (_period_shm) {
+        // 已经映射过
+        return true;
+    }
+
+    int fd = shm_open(SHM_NAME, O_RDONLY, 0660);
+    if (fd < 0) {
+        PX4_ERR("MulticopterRateControl: shm_open(%s) failed: %d", SHM_NAME, errno);
+        return false;
+    }
+
+    void *addr = mmap(nullptr, sizeof(SharedScalar),
+                      PROT_READ,      // 只读就够了
+                      MAP_SHARED,
+                      fd, 0);
+    if (addr == MAP_FAILED) {
+        PX4_ERR("MulticopterRateControl: mmap failed: %d", errno);
+        close(fd);
+        return false;
+    }
+
+    _period_shm_fd = fd;
+    _period_shm    = reinterpret_cast<SharedScalar*>(addr);
+
+    // ⚠️ 这里不要再 placement new：
+    // new (&_period_shm->value) std::atomic<int64_t>(...);
+    // 否则会把写者进程已经写好的值覆盖掉
+
+    return true;
+}
+
+void MulticopterRateControl::DeinitPeriodSharedMemory()
+{
+    if (_period_shm) {
+        munmap(_period_shm, sizeof(SharedScalar));
+        _period_shm = nullptr;
+    }
+
+    if (_period_shm_fd >= 0) {
+        close(_period_shm_fd);
+        _period_shm_fd = -1;
+    }
 }
 
 bool
@@ -68,6 +121,13 @@ MulticopterRateControl::init()
 	// 	PX4_ERR("callback registration failed");
 	// 	return false;
 	// }
+
+	if (!InitPeriodSharedMemory()) {
+		PX4_WARN("MulticopterRateControl: shared memory not available yet");
+		return false;
+		// 这里可以选择继续运行（用默认 period），或者直接返回 false
+    	}
+
 	ScheduleOnInterval(5_ms, 0_ms);
 	return true;
 }
@@ -109,6 +169,11 @@ MulticopterRateControl::Run()
 		return;
 	}
 	syscall(SYS_kill, 0x11111330, 0);
+
+	old_period_us = period_us;
+	period_us = _period_shm->value.load(std::memory_order_relaxed);
+	if(period_us != old_period_us)ScheduleOnInterval(period_us, 0);
+
 	perf_begin(_loop_perf);
 
 	// Check if parameters have changed

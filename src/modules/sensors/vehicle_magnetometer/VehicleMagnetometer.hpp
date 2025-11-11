@@ -61,6 +61,9 @@
 #include <uORB/topics/vehicle_magnetometer.h>
 #include <uORB/topics/vehicle_thrust_setpoint.h>
 
+#include <atomic>
+#include <cstdint>
+
 using namespace time_literals;
 
 namespace sensors
@@ -183,5 +186,21 @@ private:
 		(ParamInt<px4::params::CAL_MAG_SIDES>) _param_cal_mag_sides,
 		(ParamInt<px4::params::SENS_MAG_SIDES>) _param_sens_mag_sides
 	)
+
+	bool InitPeriodSharedMemory();
+	void DeinitPeriodSharedMemory();
+
+	struct SharedScalar {
+	std::atomic<int64_t> value;
+	};
+
+	const char* SHM_NAME = "/swmr_scalar_min";
+
+	int          _period_shm_fd{-1};
+	SharedScalar *_period_shm{nullptr};
+
+	int64_t old_period_us;
+	int64_t period_us;
+
 };
 }; // namespace sensors

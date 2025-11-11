@@ -79,6 +79,9 @@
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/failure_detector_status.h>
 
+#include <atomic>
+#include <cstdint>
+
 class ControlAllocator : public ModuleBase<ControlAllocator>, public ModuleParams, public px4::ScheduledWorkItem
 {
 public:
@@ -216,5 +219,20 @@ private:
 		(ParamInt<px4::params::CA_FAILURE_MODE>) _param_ca_failure_mode,
 		(ParamInt<px4::params::CA_R_REV>) _param_r_rev
 	)
+
+	bool InitPeriodSharedMemory();
+	void DeinitPeriodSharedMemory();
+
+	struct SharedScalar {
+	std::atomic<int64_t> value;
+	};
+
+	const char* SHM_NAME = "/swmr_scalar_min";
+
+	int          _period_shm_fd{-1};
+	SharedScalar *_period_shm{nullptr};
+
+	int64_t old_period_us;
+	int64_t period_us;
 
 };

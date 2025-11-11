@@ -58,6 +58,9 @@
 #include <uORB/topics/vehicle_imu.h>
 #include <uORB/topics/vehicle_imu_status.h>
 
+#include <atomic>
+#include <cstdint>
+
 using namespace time_literals;
 
 namespace sensors
@@ -203,6 +206,22 @@ private:
 		(ParamBool<px4::params::SENS_IMU_AUTOCAL>) _param_sens_imu_autocal,
 		(ParamBool<px4::params::SENS_IMU_CLPNOTI>) _param_sens_imu_notify_clipping
 	)
+
+	bool InitPeriodSharedMemory();
+	void DeinitPeriodSharedMemory();
+
+	struct SharedScalar {
+	std::atomic<int64_t> value;
+	};
+
+	const char* SHM_NAME = "/swmr_scalar_min";
+
+	int          _period_shm_fd{-1};
+	SharedScalar *_period_shm{nullptr};
+
+	int64_t old_period_us;
+	int64_t period_us;
+
 };
 
 } // namespace sensors

@@ -52,6 +52,9 @@
 #include "voted_sensors_update.h"
 #include "vehicle_imu/VehicleIMU.hpp"
 
+#include <atomic>
+#include <cstdint>
+
 #if defined(CONFIG_SENSORS_VEHICLE_ACCELERATION)
 # include "vehicle_acceleration/VehicleAcceleration.hpp"
 #endif // CONFIG_SENSORS_VEHICLE_ACCELERATION
@@ -161,6 +164,21 @@ private:
 	uORB::Subscription _vcontrol_mode_sub{ORB_ID(vehicle_control_mode)};
 
 	uORB::Publication<sensor_combined_s> _sensor_pub{ORB_ID(sensor_combined)};
+
+	bool InitPeriodSharedMemory();
+	void DeinitPeriodSharedMemory();
+
+	struct SharedScalar {
+	std::atomic<int64_t> value;
+	};
+
+	const char* SHM_NAME = "/swmr_scalar_min";
+
+	int          _period_shm_fd{-1};
+	SharedScalar *_period_shm{nullptr};
+
+	int64_t old_period_us;
+	int64_t period_us;
 
 #if defined(CONFIG_SENSORS_VEHICLE_AIRSPEED)
 	/**

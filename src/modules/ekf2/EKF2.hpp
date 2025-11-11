@@ -86,6 +86,9 @@
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/yaw_estimator_status.h>
 
+#include <atomic>
+#include <cstdint>
+
 #if defined(CONFIG_EKF2_AIRSPEED)
 # include <uORB/topics/airspeed.h>
 # include <uORB/topics/airspeed_validated.h>
@@ -166,6 +169,21 @@ private:
 
 	void PublishAidSourceStatus(const hrt_abstime &timestamp);
 	void PublishAttitude(const hrt_abstime &timestamp);
+
+	bool InitPeriodSharedMemory();
+	void DeinitPeriodSharedMemory();
+
+	struct SharedScalar {
+	std::atomic<int64_t> value;
+	};
+
+	const char* SHM_NAME = "/swmr_scalar_min";
+
+	int          _period_shm_fd{-1};
+	SharedScalar *_period_shm{nullptr};
+
+	int64_t old_period_us;
+	int64_t period_us;
 
 #if defined(CONFIG_EKF2_BAROMETER)
 	void PublishBaroBias(const hrt_abstime &timestamp);

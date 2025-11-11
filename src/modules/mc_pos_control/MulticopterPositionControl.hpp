@@ -66,6 +66,9 @@
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
 
+#include <atomic>
+#include <cstdint>
+
 using namespace time_literals;
 
 class MulticopterPositionControl : public ModuleBase<MulticopterPositionControl>, public control::SuperBlock,
@@ -127,6 +130,21 @@ private:
 		.maybe_landed = true,
 		.landed = true,
 	};
+
+	bool InitPeriodSharedMemory();
+	void DeinitPeriodSharedMemory();
+
+	struct SharedScalar {
+	std::atomic<int64_t> value;
+	};
+
+	const char* SHM_NAME = "/swmr_scalar_min";
+
+	int          _period_shm_fd{-1};
+	SharedScalar *_period_shm{nullptr};
+
+	int64_t old_period_us;
+	int64_t period_us;
 
 	DEFINE_PARAMETERS(
 		// Position Control

@@ -60,6 +60,9 @@
 #include <uORB/topics/vehicle_thrust_setpoint.h>
 #include <uORB/topics/vehicle_torque_setpoint.h>
 
+#include <atomic>
+#include <cstdint>
+
 using namespace time_literals;
 
 class MulticopterRateControl : public ModuleBase<MulticopterRateControl>, public ModuleParams, public px4::ScheduledWorkItem
@@ -161,4 +164,20 @@ private:
 
 		(ParamBool<px4::params::MC_BAT_SCALE_EN>) _param_mc_bat_scale_en
 	)
+
+	bool InitPeriodSharedMemory();
+	void DeinitPeriodSharedMemory();
+
+	struct SharedScalar {
+	std::atomic<int64_t> value;
+	};
+
+	const char* SHM_NAME = "/swmr_scalar_min";
+
+	int          _period_shm_fd{-1};
+	SharedScalar *_period_shm{nullptr};
+
+	int64_t old_period_us;
+	int64_t period_us;
+
 };

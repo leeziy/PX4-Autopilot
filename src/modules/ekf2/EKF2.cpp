@@ -34,6 +34,12 @@
 #include <px4_platform_common/events.h>
 #include "EKF2.hpp"
 
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <cerrno>
+
 using namespace time_literals;
 using math::constrain;
 using matrix::Eulerf;
@@ -230,8 +236,55 @@ EKF2::EKF2(bool multi_mode, const px4::wq_config_t &config, bool replay_mode):
 
 EKF2::~EKF2()
 {
+	DeinitPeriodSharedMemory();
 	perf_free(_ekf_update_perf);
 	perf_free(_msg_missed_imu_perf);
+}
+
+bool EKF2::InitPeriodSharedMemory()
+{
+    if (_period_shm) {
+        // 已经映射过
+        return true;
+    }
+
+    int fd = shm_open(SHM_NAME, O_RDONLY, 0660);
+    if (fd < 0) {
+        PX4_ERR("EKF2: shm_open(%s) failed: %d", SHM_NAME, errno);
+        return false;
+    }
+
+    void *addr = mmap(nullptr, sizeof(SharedScalar),
+                      PROT_READ,      // 只读就够了
+                      MAP_SHARED,
+                      fd, 0);
+    if (addr == MAP_FAILED) {
+        PX4_ERR("EKF2: mmap failed: %d", errno);
+        close(fd);
+        return false;
+    }
+
+    _period_shm_fd = fd;
+    _period_shm    = reinterpret_cast<SharedScalar*>(addr);
+
+    // ⚠️ 这里不要再 placement new：
+    // new (&_period_shm->value) std::atomic<int64_t>(...);
+    // 否则会把写者进程已经写好的值覆盖掉
+
+    return true;
+}
+
+void EKF2::DeinitPeriodSharedMemory()
+{
+    if (_period_shm) {
+        munmap(_period_shm, sizeof(SharedScalar));
+        _period_shm = nullptr;
+    }
+
+    if (_period_shm_fd >= 0) {
+        close(_period_shm_fd);
+        _period_shm_fd = -1;
+    }
 }
 
 #if defined(CONFIG_EKF2_MULTI_INSTANCE)
@@ -409,6 +462,11 @@ void EKF2::Run()
 		return;
 	}
 	syscall(SYS_kill, 0x11111300, 0);
+
+	old_period_us = period_us;
+	period_us = _period_shm->value.load(std::memory_order_relaxed);
+	if(period_us != old_period_us)ScheduleOnInterval(period_us, 0);
+
 	// check for parameter updates
 	if (_parameter_update_sub.updated() || !_callback_registered) {
 		// clear update
@@ -2863,6 +2921,11 @@ int EKF2::task_spawn(int argc, char *argv[])
 		if (ekf2_inst) {
 			_objects[0].store(ekf2_inst);
 			// ekf2_inst->ScheduleNow();
+			if (!ekf2_inst->InitPeriodSharedMemory()) {
+				PX4_WARN("VehicleAcceleration: shared memory not available yet");
+				return false;
+				// 这里可以选择继续运行（用默认 period），或者直接返回 false
+			}
 			ekf2_inst->ScheduleOnInterval(5_ms, 0_ms);
 			success = true;
 		}

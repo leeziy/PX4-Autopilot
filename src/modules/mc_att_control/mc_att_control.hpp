@@ -59,6 +59,9 @@
 #include <lib/slew_rate/SlewRate.hpp>
 
 #include <AttitudeControl.hpp>
+#include <atomic>
+#include <cstdint>
+
 
 using namespace time_literals;
 
@@ -163,5 +166,21 @@ private:
 
 		(ParamFloat<px4::params::COM_SPOOLUP_TIME>) _param_com_spoolup_time
 	)
+
+	bool InitPeriodSharedMemory();
+	void DeinitPeriodSharedMemory();
+
+	struct SharedScalar {
+	std::atomic<int64_t> value;
+	};
+
+	const char* SHM_NAME = "/swmr_scalar_min";
+
+	int          _period_shm_fd{-1};
+	SharedScalar *_period_shm{nullptr};
+
+	int64_t old_period_us;
+	int64_t period_us;
+
 };
 
