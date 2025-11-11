@@ -51,6 +51,10 @@
 #include <uORB/topics/sensor_selection.h>
 #include <uORB/topics/vehicle_acceleration.h>
 
+#include <atomic>
+#include <cstdint>
+
+
 using namespace time_literals;
 
 namespace sensors
@@ -101,6 +105,21 @@ private:
 		(ParamFloat<px4::params::IMU_ACCEL_CUTOFF>) _param_imu_accel_cutoff,
 		(ParamInt<px4::params::IMU_INTEG_RATE>) _param_imu_integ_rate
 	)
+
+	bool InitPeriodSharedMemory();
+	void DeinitPeriodSharedMemory();
+
+	struct SharedScalar {
+	std::atomic<int64_t> value;
+	};
+
+	const char* SHM_NAME = "/swmr_scalar_min";
+
+	int          _period_shm_fd{-1};
+	SharedScalar *_period_shm{nullptr};
+
+	int64_t old_period_us;
+	int64_t period_us;
 };
 
 } // namespace sensors

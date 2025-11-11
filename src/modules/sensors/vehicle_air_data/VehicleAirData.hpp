@@ -55,6 +55,9 @@
 #include <uORB/topics/sensors_status.h>
 #include <uORB/topics/vehicle_air_data.h>
 
+#include <atomic>
+#include <cstdint>
+
 using namespace time_literals;
 
 namespace sensors
@@ -127,5 +130,20 @@ private:
 		(ParamFloat<px4::params::SENS_BARO_QNH>) _param_sens_baro_qnh,
 		(ParamFloat<px4::params::SENS_BARO_RATE>) _param_sens_baro_rate
 	)
+
+	bool InitPeriodSharedMemory();
+	void DeinitPeriodSharedMemory();
+
+	struct SharedScalar {
+	std::atomic<int64_t> value;
+	};
+
+	const char* SHM_NAME = "/swmr_scalar_min";
+
+	int          _period_shm_fd{-1};
+	SharedScalar *_period_shm{nullptr};
+
+	int64_t old_period_us;
+	int64_t period_us;
 };
 }; // namespace sensors
