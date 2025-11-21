@@ -59,7 +59,7 @@ VehicleMagnetometer::VehicleMagnetometer() :
 	param_find("SENS_MAG_AUTOROT");
 
 	_voter.set_timeout(SENSOR_TIMEOUT);
-	_voter.set_equal_value_threshold(1000);
+	_voter.set_equal_value_threshold(UINT32_MAX);
 
 	ParametersUpdate(true);
 
@@ -140,7 +140,10 @@ bool VehicleMagnetometer::Start()
 		// 这里可以选择继续运行（用默认 period），或者直接返回 false
     	}
 
-	ScheduleOnInterval(20_ms, 0_ms);
+	const hrt_abstime phase_ref = hrt_absolute_time();
+	const uint32_t delay_to_next_second = (1_s - (phase_ref % 1_s)) % 1_s;
+	ScheduleOnInterval(5_ms, delay_to_next_second);
+	// ScheduleOnInterval(20_ms, 0_ms);
 	return true;
 }
 
@@ -485,8 +488,12 @@ void VehicleMagnetometer::Run()
 
 	old_period_us = period_us;
 	period_us = _period_shm->value.load(std::memory_order_relaxed);
-	if(period_us != old_period_us)ScheduleOnInterval(4*period_us, 0);
-
+	if(period_us != old_period_us)
+	{
+		const hrt_abstime phase_ref = hrt_absolute_time();
+		const uint32_t delay_to_next_second = (1_s - (phase_ref % 1_s)) % 1_s;
+		ScheduleOnInterval(period_us, delay_to_next_second);
+	}
 	perf_begin(_cycle_perf);
 
 	// reschedule timeout

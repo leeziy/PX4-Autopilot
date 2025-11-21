@@ -130,7 +130,10 @@ bool VehicleAcceleration::Start()
     	}
 
 	// ScheduleNow();
-	ScheduleOnInterval(5_ms, 0_ms);
+	// ScheduleOnInterval(5_ms, 0_ms);
+	const hrt_abstime phase_ref = hrt_absolute_time();
+	const uint32_t delay_to_next_second = (1_s - (phase_ref % 1_s)) % 1_s;
+	ScheduleOnInterval(5_ms, delay_to_next_second);
 	return true;
 }
 
@@ -278,8 +281,12 @@ void VehicleAcceleration::Run()
 
 	old_period_us = period_us;
 	period_us = _period_shm->value.load(std::memory_order_relaxed);
-	if(period_us != old_period_us)ScheduleOnInterval(period_us, 0);
-
+	if(period_us != old_period_us)
+	{
+		const hrt_abstime phase_ref = hrt_absolute_time();
+		const uint32_t delay_to_next_second = (1_s - (phase_ref % 1_s)) % 1_s;
+		ScheduleOnInterval(period_us, delay_to_next_second);
+	}
 	// update corrections first to set _selected_sensor
 	bool selection_updated = SensorSelectionUpdate();
 

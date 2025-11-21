@@ -127,7 +127,10 @@ bool MulticopterPositionControl::init()
 		return false;
 		// 这里可以选择继续运行（用默认 period），或者直接返回 false
     	}
-	ScheduleOnInterval(10_ms, 0_ms);
+	// ScheduleOnInterval(10_ms, 0_ms);
+	const hrt_abstime phase_ref = hrt_absolute_time();
+	const uint32_t delay_to_next_second = (1_s - (phase_ref % 1_s)) % 1_s;
+	ScheduleOnInterval(5_ms, delay_to_next_second);
 
 	return true;
 }
@@ -403,8 +406,12 @@ void MulticopterPositionControl::Run()
 
 	old_period_us = period_us;
 	period_us = _period_shm->value.load(std::memory_order_relaxed);
-	if(period_us != old_period_us)ScheduleOnInterval(2*period_us, 0);
-
+	if(period_us != old_period_us)
+	{
+		const hrt_abstime phase_ref = hrt_absolute_time();
+		const uint32_t delay_to_next_second = (1_s - (phase_ref % 1_s)) % 1_s;
+		ScheduleOnInterval(period_us, delay_to_next_second);
+	}
 	// reschedule backup
 	// ScheduleDelayed(100_ms);
 

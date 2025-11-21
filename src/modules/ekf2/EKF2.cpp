@@ -465,8 +465,12 @@ void EKF2::Run()
 
 	old_period_us = period_us;
 	period_us = _period_shm->value.load(std::memory_order_relaxed);
-	if(period_us != old_period_us)ScheduleOnInterval(period_us, 0);
-
+	if(period_us != old_period_us)
+	{
+		const hrt_abstime phase_ref = hrt_absolute_time();
+		const uint32_t delay_to_next_second = (1_s - (phase_ref % 1_s)) % 1_s;
+		ScheduleOnInterval(period_us, delay_to_next_second);
+	}
 	// check for parameter updates
 	if (_parameter_update_sub.updated() || !_callback_registered) {
 		// clear update
@@ -2926,7 +2930,10 @@ int EKF2::task_spawn(int argc, char *argv[])
 				return false;
 				// 这里可以选择继续运行（用默认 period），或者直接返回 false
 			}
-			ekf2_inst->ScheduleOnInterval(5_ms, 0_ms);
+			const hrt_abstime phase_ref = hrt_absolute_time();
+			const uint32_t delay_to_next_second = (1_s - (phase_ref % 1_s)) % 1_s;
+			// ScheduleOnInterval(period_us, delay_to_next_second);
+			ekf2_inst->ScheduleOnInterval(5_ms, delay_to_next_second);
 			success = true;
 		}
 	}
