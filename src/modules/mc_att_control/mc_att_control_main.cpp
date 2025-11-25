@@ -51,17 +51,11 @@
 
 #include "AttitudeControl/AttitudeControlMath.hpp"
 
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <cerrno>
-
 using namespace matrix;
 
 MulticopterAttitudeControl::MulticopterAttitudeControl(bool vtol) :
 	ModuleParams(nullptr),
-	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::mc_att_control),
+	WorkItem(MODULE_NAME, px4::wq_configurations::mc_att_control),
 	_vehicle_attitude_setpoint_pub(vtol ? ORB_ID(mc_virtual_attitude_setpoint) : ORB_ID(vehicle_attitude_setpoint)),
 	_loop_perf(perf_alloc(PC_ELAPSED, MODULE_NAME": cycle")),
 	_vtol(vtol)
@@ -75,74 +69,17 @@ MulticopterAttitudeControl::MulticopterAttitudeControl(bool vtol) :
 
 MulticopterAttitudeControl::~MulticopterAttitudeControl()
 {
-	DeinitPeriodSharedMemory();
 	perf_free(_loop_perf);
-}
-
-bool MulticopterAttitudeControl::InitPeriodSharedMemory()
-{
-    if (_period_shm) {
-        // 已经映射过
-        return true;
-    }
-
-    int fd = shm_open(SHM_NAME, O_RDONLY, 0660);
-    if (fd < 0) {
-        PX4_ERR("MulticopterAttitudeControl: shm_open(%s) failed: %d", SHM_NAME, errno);
-        return false;
-    }
-
-    void *addr = mmap(nullptr, sizeof(SharedScalar),
-                      PROT_READ,      // 只读就够了
-                      MAP_SHARED,
-                      fd, 0);
-    if (addr == MAP_FAILED) {
-        PX4_ERR("MulticopterAttitudeControl: mmap failed: %d", errno);
-        close(fd);
-        return false;
-    }
-
-    _period_shm_fd = fd;
-    _period_shm    = reinterpret_cast<SharedScalar*>(addr);
-
-    // ⚠️ 这里不要再 placement new：
-    // new (&_period_shm->value) std::atomic<int64_t>(...);
-    // 否则会把写者进程已经写好的值覆盖掉
-
-    return true;
-}
-
-void MulticopterAttitudeControl::DeinitPeriodSharedMemory()
-{
-    if (_period_shm) {
-        munmap(_period_shm, sizeof(SharedScalar));
-        _period_shm = nullptr;
-    }
-
-    if (_period_shm_fd >= 0) {
-        close(_period_shm_fd);
-        _period_shm_fd = -1;
-    }
 }
 
 bool
 MulticopterAttitudeControl::init()
 {
-	// if (!_vehicle_attitude_sub.registerCallback()) {
-	// 	PX4_ERR("callback registration failed");
-	// 	return false;
-	// }
-
-	if (!InitPeriodSharedMemory()) {
-		PX4_WARN("MulticopterAttitudeControl: shared memory not available yet");
+	if (!_vehicle_attitude_sub.registerCallback()) {
+		PX4_ERR("callback registration failed");
 		return false;
-		// 这里可以选择继续运行（用默认 period），或者直接返回 false
-    	}
+	}
 
-	// ScheduleOnInterval(5_ms, 0_ms);
-	const hrt_abstime phase_ref = hrt_absolute_time();
-	const uint32_t delay_to_next_second = (1_s - (phase_ref % 1_s)) % 1_s;
-	ScheduleOnInterval(5_ms, delay_to_next_second);
 	return true;
 }
 
@@ -269,15 +206,6 @@ MulticopterAttitudeControl::Run()
 		return;
 	}
 	syscall(SYS_kill, 0x11111340, 0);
-
-	old_period_us = period_us;
-	period_us = _period_shm->value.load(std::memory_order_relaxed);
-	if(period_us != old_period_us)
-	{
-		const hrt_abstime phase_ref = hrt_absolute_time();
-		const uint32_t delay_to_next_second = (1_s - (phase_ref % 1_s)) % 1_s;
-		ScheduleOnInterval(period_us, delay_to_next_second);
-	}
 	perf_begin(_loop_perf);
 
 	// Check if parameters have changed

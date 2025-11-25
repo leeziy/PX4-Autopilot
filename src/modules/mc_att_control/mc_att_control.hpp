@@ -41,7 +41,6 @@
 #include <px4_platform_common/module_params.h>
 #include <px4_platform_common/posix.h>
 #include <px4_platform_common/px4_work_queue/WorkItem.hpp>
-#include <px4_platform_common/px4_work_queue/ScheduledWorkItem.hpp>
 #include <uORB/Publication.hpp>
 #include <uORB/Subscription.hpp>
 #include <uORB/SubscriptionCallback.hpp>
@@ -59,13 +58,11 @@
 #include <lib/slew_rate/SlewRate.hpp>
 
 #include <AttitudeControl.hpp>
-#include <atomic>
-#include <cstdint>
-
 
 using namespace time_literals;
 
-class MulticopterAttitudeControl : public ModuleBase<MulticopterAttitudeControl>, public ModuleParams, public px4::ScheduledWorkItem
+class MulticopterAttitudeControl : public ModuleBase<MulticopterAttitudeControl>, public ModuleParams,
+	public px4::WorkItem
 {
 public:
 	MulticopterAttitudeControl(bool vtol = false);
@@ -166,21 +163,5 @@ private:
 
 		(ParamFloat<px4::params::COM_SPOOLUP_TIME>) _param_com_spoolup_time
 	)
-
-	bool InitPeriodSharedMemory();
-	void DeinitPeriodSharedMemory();
-
-	struct SharedScalar {
-	std::atomic<int64_t> value;
-	};
-
-	const char* SHM_NAME = "/swmr_scalar_min";
-
-	int          _period_shm_fd{-1};
-	SharedScalar *_period_shm{nullptr};
-
-	int64_t old_period_us;
-	int64_t period_us;
-
 };
 

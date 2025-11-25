@@ -49,7 +49,6 @@
 #include <px4_platform_common/module_params.h>
 #include <px4_platform_common/posix.h>
 #include <px4_platform_common/px4_work_queue/WorkItem.hpp>
-#include <px4_platform_common/px4_work_queue/ScheduledWorkItem.hpp>
 #include <uORB/Publication.hpp>
 #include <uORB/Subscription.hpp>
 #include <uORB/SubscriptionCallback.hpp>
@@ -62,14 +61,10 @@
 
 #include "zero_order_hover_thrust_ekf.hpp"
 
-#include <atomic>
-#include <cstdint>
-
-
 using namespace time_literals;
 
 class MulticopterHoverThrustEstimator : public ModuleBase<MulticopterHoverThrustEstimator>, public ModuleParams,
-	public px4::ScheduledWorkItem
+	public px4::WorkItem
 {
 public:
 	MulticopterHoverThrustEstimator();
@@ -131,20 +126,4 @@ private:
 		(ParamFloat<px4::params::HTE_VZ_THR>) _param_hte_vz_thr,
 		(ParamFloat<px4::params::MPC_THR_HOVER>) _param_mpc_thr_hover
 	)
-
-	bool InitPeriodSharedMemory();
-	void DeinitPeriodSharedMemory();
-
-	struct SharedScalar {
-	std::atomic<int64_t> value;
-	};
-
-	const char* SHM_NAME = "/swmr_scalar_min";
-
-	int          _period_shm_fd{-1};
-	SharedScalar *_period_shm{nullptr};
-
-	int64_t old_period_us;
-	int64_t period_us;
-
 };

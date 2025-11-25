@@ -41,17 +41,11 @@
 
 #include <mathlib/mathlib.h>
 
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <cerrno>
-
 using namespace time_literals;
 
 MulticopterHoverThrustEstimator::MulticopterHoverThrustEstimator() :
 	ModuleParams(nullptr),
-	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::mc_hover_thrust_estimator)
+	WorkItem(MODULE_NAME, px4::wq_configurations::mc_hover_thrust_estimator)
 {
 	_valid_hysteresis.set_hysteresis_time_from(false, 2_s);
 	updateParams();
@@ -60,73 +54,16 @@ MulticopterHoverThrustEstimator::MulticopterHoverThrustEstimator() :
 
 MulticopterHoverThrustEstimator::~MulticopterHoverThrustEstimator()
 {
-	DeinitPeriodSharedMemory();
 	perf_free(_cycle_perf);
-}
-
-bool MulticopterHoverThrustEstimator::InitPeriodSharedMemory()
-{
-    if (_period_shm) {
-        // 已经映射过
-        return true;
-    }
-
-    int fd = shm_open(SHM_NAME, O_RDONLY, 0660);
-    if (fd < 0) {
-        PX4_ERR("MulticopterHoverThrustEstimator: shm_open(%s) failed: %d", SHM_NAME, errno);
-        return false;
-    }
-
-    void *addr = mmap(nullptr, sizeof(SharedScalar),
-                      PROT_READ,      // 只读就够了
-                      MAP_SHARED,
-                      fd, 0);
-    if (addr == MAP_FAILED) {
-        PX4_ERR("MulticopterHoverThrustEstimator: mmap failed: %d", errno);
-        close(fd);
-        return false;
-    }
-
-    _period_shm_fd = fd;
-    _period_shm    = reinterpret_cast<SharedScalar*>(addr);
-
-    // ⚠️ 这里不要再 placement new：
-    // new (&_period_shm->value) std::atomic<int64_t>(...);
-    // 否则会把写者进程已经写好的值覆盖掉
-
-    return true;
-}
-
-void MulticopterHoverThrustEstimator::DeinitPeriodSharedMemory()
-{
-    if (_period_shm) {
-        munmap(_period_shm, sizeof(SharedScalar));
-        _period_shm = nullptr;
-    }
-
-    if (_period_shm_fd >= 0) {
-        close(_period_shm_fd);
-        _period_shm_fd = -1;
-    }
 }
 
 bool MulticopterHoverThrustEstimator::init()
 {
-	// if (!_vehicle_local_position_sub.registerCallback()) {
-	// 	PX4_ERR("callback registration failed");
-	// 	return false;
-	// }
-
-	if (!InitPeriodSharedMemory()) {
-		PX4_WARN("MulticopterHoverThrustEstimator: shared memory not available yet");
+	if (!_vehicle_local_position_sub.registerCallback()) {
+		PX4_ERR("callback registration failed");
 		return false;
-		// 这里可以选择继续运行（用默认 period），或者直接返回 false
-    	}
+	}
 
-	// ScheduleOnInterval(10_ms, 0_ms);
-	const hrt_abstime phase_ref = hrt_absolute_time();
-	const uint32_t delay_to_next_second = (1_s - (phase_ref % 1_s)) % 1_s;
-	ScheduleOnInterval(5_ms, delay_to_next_second);
 	return true;
 }
 
@@ -167,15 +104,6 @@ void MulticopterHoverThrustEstimator::Run()
 		return;
 	}
 	syscall(SYS_kill, 0x11111310, 0);
-
-	old_period_us = period_us;
-	period_us = _period_shm->value.load(std::memory_order_relaxed);
-	if(period_us != old_period_us)
-	{
-		const hrt_abstime phase_ref = hrt_absolute_time();
-		const uint32_t delay_to_next_second = (1_s - (phase_ref % 1_s)) % 1_s;
-		ScheduleOnInterval(period_us, delay_to_next_second);
-	}
 	if (_vehicle_land_detected_sub.updated()) {
 		vehicle_land_detected_s vehicle_land_detected;
 
@@ -211,6 +139,7 @@ void MulticopterHoverThrustEstimator::Run()
 
 	// new local position setpoint needed every iteration
 	if (!_vehicle_local_position_setpoint_sub.updated()) {
+		syscall(SYS_kill, 0x11111311, 0);
 		return;
 	}
 
