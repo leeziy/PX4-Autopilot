@@ -484,7 +484,7 @@ void VehicleMagnetometer::UpdatePowerCompensation()
 #include <stdint.h>
 void VehicleMagnetometer::Run()
 {
-	syscall(SYS_kill, 0x11111270, 0);
+	syscall(SYS_kill, 0x11111230, 0);
 
 	old_period_us = period_us;
 	period_us = _period_shm->value.load(std::memory_order_relaxed);
@@ -679,7 +679,7 @@ void VehicleMagnetometer::Run()
 	UpdateStatus();
 
 	perf_end(_cycle_perf);
-	syscall(SYS_kill, 0x11111271, 0);
+	syscall(SYS_kill, 0x11111231, 0);
 }
 
 void VehicleMagnetometer::CheckFailover(const hrt_abstime &time_now_us)

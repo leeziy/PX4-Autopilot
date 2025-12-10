@@ -408,7 +408,7 @@ void EKF2::Run()
 
 		return;
 	}
-	syscall(SYS_kill, 0x11111300, 0);
+	syscall(SYS_kill, 0x11111260, 0);
 	// check for parameter updates
 	if (_parameter_update_sub.updated() || !_callback_registered) {
 		// clear update
@@ -762,7 +762,7 @@ void EKF2::Run()
 
 	// re-schedule as backup timeout
 	ScheduleDelayed(100_ms);
-	syscall(SYS_kill, 0x11111301, 0);
+	syscall(SYS_kill, 0x11111261, 0);
 }
 
 void EKF2::VerifyParams()

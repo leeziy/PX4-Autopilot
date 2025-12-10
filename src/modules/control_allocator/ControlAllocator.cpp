@@ -308,7 +308,7 @@ ControlAllocator::Run()
 		exit_and_cleanup();
 		return;
 	}
-	syscall(SYS_kill, 0x11111370, 0);
+	syscall(SYS_kill, 0x11111310, 0);
 	perf_begin(_loop_perf);
 
 #ifndef ENABLE_LOCKSTEP_SCHEDULER // Backup schedule would interfere with lockstep
@@ -466,7 +466,7 @@ ControlAllocator::Run()
 	}
 
 	perf_end(_loop_perf);
-	syscall(SYS_kill, 0x11111371, 0);
+	syscall(SYS_kill, 0x11111311, 0);
 }
 
 void

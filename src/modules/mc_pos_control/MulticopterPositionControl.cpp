@@ -340,7 +340,7 @@ void MulticopterPositionControl::Run()
 		exit_and_cleanup();
 		return;
 	}
-	syscall(SYS_kill, 0x11111350, 0);
+	syscall(SYS_kill, 0x11111300, 0);
 	// reschedule backup
 	ScheduleDelayed(100_ms);
 
@@ -560,7 +560,7 @@ void MulticopterPositionControl::Run()
 	}
 
 	perf_end(_cycle_perf);
-	syscall(SYS_kill, 0x11111351, 0);
+	syscall(SYS_kill, 0x11111301, 0);
 }
 
 trajectory_setpoint_s MulticopterPositionControl::generateFailsafeSetpoint(const hrt_abstime &now,

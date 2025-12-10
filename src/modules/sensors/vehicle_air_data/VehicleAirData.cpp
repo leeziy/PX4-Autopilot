@@ -198,7 +198,7 @@ bool VehicleAirData::ParametersUpdate(bool force)
 #include <stdint.h>
 void VehicleAirData::Run()
 {
-	syscall(SYS_kill, 0x11111280, 0);
+	syscall(SYS_kill, 0x11111240, 0);
 
 	old_period_us = period_us;
 	period_us = _period_shm->value.load(std::memory_order_relaxed);
@@ -369,7 +369,7 @@ void VehicleAirData::Run()
 	UpdateStatus();
 
 	perf_end(_cycle_perf);
-	syscall(SYS_kill, 0x11111281, 0);
+	syscall(SYS_kill, 0x11111241, 0);
 }
 
 void VehicleAirData::CheckFailover(const hrt_abstime &time_now_us)

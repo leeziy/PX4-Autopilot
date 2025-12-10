@@ -103,7 +103,7 @@ void MulticopterHoverThrustEstimator::Run()
 		exit_and_cleanup();
 		return;
 	}
-	syscall(SYS_kill, 0x11111310, 0);
+	syscall(SYS_kill, 0x11111270, 0);
 	if (_vehicle_land_detected_sub.updated()) {
 		vehicle_land_detected_s vehicle_land_detected;
 
@@ -139,7 +139,7 @@ void MulticopterHoverThrustEstimator::Run()
 
 	// new local position setpoint needed every iteration
 	if (!_vehicle_local_position_setpoint_sub.updated()) {
-		syscall(SYS_kill, 0x11111311, 0);
+		syscall(SYS_kill, 0x11111271, 0);
 		return;
 	}
 
@@ -215,7 +215,7 @@ void MulticopterHoverThrustEstimator::Run()
 	}
 
 	perf_end(_cycle_perf);
-	syscall(SYS_kill, 0x11111311, 0);
+	syscall(SYS_kill, 0x11111271, 0);
 }
 
 void MulticopterHoverThrustEstimator::publishStatus(const hrt_abstime &timestamp_sample)

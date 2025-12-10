@@ -108,7 +108,7 @@ MulticopterRateControl::Run()
 		exit_and_cleanup();
 		return;
 	}
-	syscall(SYS_kill, 0x11111330, 0);
+	syscall(SYS_kill, 0x11111280, 0);
 	perf_begin(_loop_perf);
 
 	// Check if parameters have changed
@@ -266,7 +266,7 @@ MulticopterRateControl::Run()
 	}
 
 	perf_end(_loop_perf);
-	syscall(SYS_kill, 0x11111331, 0);
+	syscall(SYS_kill, 0x11111281, 0);
 }
 
 void MulticopterRateControl::updateActuatorControlsStatus(const vehicle_torque_setpoint_s &vehicle_torque_setpoint,

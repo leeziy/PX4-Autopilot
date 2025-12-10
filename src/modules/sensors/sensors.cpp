@@ -593,7 +593,7 @@ void Sensors::Run()
 		exit_and_cleanup();
 		return;
 	}
-	syscall(SYS_kill, 0x11111290, 0);
+	syscall(SYS_kill, 0x11111250, 0);
 
 	old_period_us = period_us;
 	period_us = _period_shm->value.load(std::memory_order_relaxed);
@@ -705,7 +705,7 @@ void Sensors::Run()
 	// ScheduleDelayed(10_ms);
 
 	perf_end(_loop_perf);
-	syscall(SYS_kill, 0x11111291, 0);
+	syscall(SYS_kill, 0x11111251, 0);
 }
 
 int Sensors::task_spawn(int argc, char *argv[])

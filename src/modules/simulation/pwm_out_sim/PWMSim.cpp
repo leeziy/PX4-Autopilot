@@ -109,7 +109,7 @@ void PWMSim::Run()
 		exit_and_cleanup();
 		return;
 	}
-	syscall(SYS_kill, 0x11111380, 0);
+	syscall(SYS_kill, 0x11111320, 0);
 	_mixing_output.update();
 
 	// check for parameter updates
@@ -121,7 +121,7 @@ void PWMSim::Run()
 
 	// check at end of cycle (updateSubscriptions() can potentially change to a different WorkQueue thread)
 	_mixing_output.updateSubscriptions(false);
-	syscall(SYS_kill, 0x11111381, 0);
+	syscall(SYS_kill, 0x11111321, 0);
 }
 
 int PWMSim::task_spawn(int argc, char *argv[])

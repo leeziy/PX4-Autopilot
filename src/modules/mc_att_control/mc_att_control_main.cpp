@@ -205,7 +205,7 @@ MulticopterAttitudeControl::Run()
 		exit_and_cleanup();
 		return;
 	}
-	syscall(SYS_kill, 0x11111340, 0);
+	syscall(SYS_kill, 0x11111290, 0);
 	perf_begin(_loop_perf);
 
 	// Check if parameters have changed
@@ -363,7 +363,7 @@ MulticopterAttitudeControl::Run()
 	}
 
 	perf_end(_loop_perf);
-	syscall(SYS_kill, 0x11111341, 0);
+	syscall(SYS_kill, 0x11111291, 0);
 }
 
 int MulticopterAttitudeControl::task_spawn(int argc, char *argv[])

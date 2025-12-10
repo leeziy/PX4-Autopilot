@@ -848,7 +848,7 @@ float VehicleAngularVelocity::FilterAngularAcceleration(int axis, float inverse_
 #include <stdint.h>
 void VehicleAngularVelocity::Run()
 {
-	syscall(SYS_kill, 0x11111250, 0);
+	syscall(SYS_kill, 0x11111210, 0);
 
 	old_period_us = period_us;
 	period_us = _period_shm->value.load(std::memory_order_relaxed);
@@ -869,7 +869,7 @@ void VehicleAngularVelocity::Run()
 		if (!UpdateSampleRate()) {
 			// sensor sample rate required to run
 			perf_end(_cycle_perf);
-			syscall(SYS_kill, 0x11111251, 0);
+			syscall(SYS_kill, 0x11111211, 0);
 			return;
 		}
 	}
@@ -884,7 +884,7 @@ void VehicleAngularVelocity::Run()
 		if (_reset_filters) {
 			// not safe to run until filters configured
 			perf_end(_cycle_perf);
-			syscall(SYS_kill, 0x11111251, 0);
+			syscall(SYS_kill, 0x11111211, 0);
 			return;
 		}
 	}
@@ -930,7 +930,7 @@ void VehicleAngularVelocity::Run()
 								angular_acceleration_uncalibrated)) {
 
 						perf_end(_cycle_perf);
-						syscall(SYS_kill, 0x11111251, 0);
+						syscall(SYS_kill, 0x11111211, 0);
 						return;
 					}
 				}
@@ -976,7 +976,7 @@ void VehicleAngularVelocity::Run()
 								angular_acceleration_uncalibrated)) {
 
 						perf_end(_cycle_perf);
-						syscall(SYS_kill, 0x11111251, 0);
+						syscall(SYS_kill, 0x11111211, 0);
 						return;
 					}
 				}
@@ -990,7 +990,7 @@ void VehicleAngularVelocity::Run()
 	}
 
 	perf_end(_cycle_perf);
-	syscall(SYS_kill, 0x11111251, 0);
+	syscall(SYS_kill, 0x11111211, 0);
 }
 
 bool VehicleAngularVelocity::CalibrateAndPublish(const hrt_abstime &timestamp_sample,

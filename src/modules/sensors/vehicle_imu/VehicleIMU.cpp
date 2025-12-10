@@ -235,7 +235,7 @@ bool VehicleIMU::ParametersUpdate(bool force)
 #include <stdint.h>
 void VehicleIMU::Run()
 {
-	syscall(SYS_kill, 0x11111240, 0);
+	syscall(SYS_kill, 0x11111200, 0);
 
 	old_period_us = period_us;
 	period_us = _period_shm->value.load(std::memory_order_relaxed);
@@ -247,6 +247,7 @@ void VehicleIMU::Run()
 	if (!_accel_calibration.enabled() || !_gyro_calibration.enabled()) {
 		_sensor_gyro_sub.unregisterCallback();
 		// ScheduleDelayed(1_s);
+		syscall(SYS_kill, 0x11111201, 0);
 		return;
 	}
 
@@ -349,7 +350,7 @@ void VehicleIMU::Run()
 			SensorCalibrationSaveGyro();
 		}
 	}
-	syscall(SYS_kill, 0x11111241, 0);
+	syscall(SYS_kill, 0x11111201, 0);
 }
 
 bool VehicleIMU::UpdateAccel()
