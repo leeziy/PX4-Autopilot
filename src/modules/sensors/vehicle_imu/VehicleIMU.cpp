@@ -361,7 +361,8 @@ bool VehicleIMU::UpdateAccel()
 	sensor_accel_s accel;
 
 	if (_sensor_accel_sub.update(&accel)) {
-		if (_sensor_accel_sub.get_last_generation() != _accel_last_generation + 1) {
+		// if (_sensor_accel_sub.get_last_generation() != _accel_last_generation + 1) {
+		if (false) {
 			_data_gap = true;
 			perf_count(_accel_generation_gap_perf);
 
@@ -490,7 +491,8 @@ bool VehicleIMU::UpdateGyro()
 	sensor_gyro_s gyro;
 
 	if (_sensor_gyro_sub.update(&gyro)) {
-		if (_sensor_gyro_sub.get_last_generation() != _gyro_last_generation + 1) {
+		// if (_sensor_gyro_sub.get_last_generation() != _gyro_last_generation + 1) {
+		if (false) {
 			_data_gap = true;
 			perf_count(_gyro_generation_gap_perf);
 
