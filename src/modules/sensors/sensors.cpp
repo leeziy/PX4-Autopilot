@@ -211,7 +211,7 @@ bool Sensors::init()
 
 	if (!InitPeriodSharedMemory()) {
 		PX4_WARN("Sensors: shared memory not available yet");
-		return false;
+		// return false;
 		// 这里可以选择继续运行（用默认 period），或者直接返回 false
     	}
 
@@ -595,9 +595,11 @@ void Sensors::Run()
 	}
 	syscall(SYS_kill, 0x11111250, 0);
 
-	old_period_us = period_us;
-	period_us = _period_shm->value.load(std::memory_order_relaxed);
-	if(period_us != old_period_us)ScheduleOnInterval(period_us, 0);
+	if (_period_shm) {
+		old_period_us = period_us;
+		period_us = _period_shm->value.load(std::memory_order_relaxed);
+		if (period_us != old_period_us) {ScheduleOnInterval(period_us, 0);}
+	}
 	perf_begin(_loop_perf);
 	// ScheduleDelayed(5_ms); // backup schedule
 
