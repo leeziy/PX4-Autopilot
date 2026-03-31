@@ -122,9 +122,9 @@ bool VehicleAirData::Start()
 		// 这里可以选择继续运行（用默认 period），或者直接返回 false
     	}
 	// ScheduleOnInterval(20_ms, 0_ms);
-	const hrt_abstime phase_ref = hrt_absolute_time();
-	const uint32_t delay_to_next_second = (1_s - (phase_ref % 1_s)) % 1_s;
-	ScheduleOnInterval(2500_us, delay_to_next_second);
+	// const hrt_abstime phase_ref = hrt_absolute_time();
+	// const uint32_t delay_to_next_second = (1_s - (phase_ref % 1_s)) % 1_s;
+	ScheduleOnInterval(2500_us, 0);
 	return true;
 }
 
