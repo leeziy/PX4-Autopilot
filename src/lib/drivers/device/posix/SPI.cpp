@@ -42,19 +42,47 @@
 
 #if defined(CONFIG_SPI)
 
-#ifdef __PX4_LINUX
+#if defined(__PX4_LINUX)
 
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include <linux/types.h>
-#include <linux/spi/spidev.h>
 
 #include <px4_platform_common/i2c_spi_buses.h>
 #include <px4_platform_common/px4_config.h>
 
+// #define __SYLIXOS_KERNEL
+
+#include "SylixOS.h"
+
+#define LW_SPI_CTL_BAUDRATE    4
+#define LW_SPI_CTL_CS          3
+#define SPI_DEVICE_CPOL_CPHA   5
+#define LW_SPI_M_CPOL_0        0x0000   /*  CPOL 配置                   */
+#define LW_SPI_M_CPOL_1        0x0001
+#define LW_SPI_M_CPHA_0        0x0000   /*  CPHA 配置                   */
+#define LW_SPI_M_CPHA_1        0x0002
+
 namespace device
 {
+
+static int spi_mode_to_sylixos_mode(spi_mode_e mode)
+{
+	switch (mode) {
+	case SPIDEV_MODE0:
+		return LW_SPI_M_CPOL_0 | LW_SPI_M_CPHA_0;
+
+	case SPIDEV_MODE1:
+		return LW_SPI_M_CPOL_0 | LW_SPI_M_CPHA_1;
+
+	case SPIDEV_MODE2:
+		return LW_SPI_M_CPOL_1 | LW_SPI_M_CPHA_0;
+
+	case SPIDEV_MODE3:
+	default:
+		return LW_SPI_M_CPOL_1 | LW_SPI_M_CPHA_1;
+	}
+}
 
 SPI::SPI(uint8_t device_type, const char *name, int bus, uint32_t device, enum spi_mode_e mode, uint32_t frequency) :
 	CDev(name, nullptr),
@@ -88,7 +116,7 @@ SPI::init()
 {
 	// Open the actual SPI device
 	char dev_path[16];
-	snprintf(dev_path, sizeof(dev_path), "/dev/spidev%i.%i", get_device_bus(), PX4_SPI_DEV_ID(_device));
+	snprintf(dev_path, sizeof(dev_path), "/dev/spidev%i", get_device_bus());
 	DEVICE_DEBUG("%s", dev_path);
 	_fd = ::open(dev_path, O_RDWR);
 
@@ -114,7 +142,7 @@ SPI::init()
 	}
 
 	/* tell the world where we are */
-	DEVICE_DEBUG("on SPI bus %d at %d (%u KHz)", get_device_bus(), PX4_SPI_DEV_ID(_device), _frequency / 1000);
+	DEVICE_DEBUG("on SPI bus %d (%u KHz)", get_device_bus(), _frequency / 1000);
 
 	return PX4_OK;
 }
@@ -127,26 +155,54 @@ SPI::transfer(uint8_t *send, uint8_t *recv, unsigned len)
 	}
 
 	// set write mode of SPI
-	int result = ::ioctl(_fd, SPI_IOC_WR_MODE, &_mode);
+	// int result = ::ioctl(_fd, SPI_IOC_WR_MODE, &_mode);
 
-	if (result == -1) {
-		PX4_ERR("can’t set spi mode");
+	// if (result == -1) {
+	// 	PX4_ERR("can’t set spi mode");
+	// 	return PX4_ERROR;
+	// }
+
+	// spi_ioc_transfer spi_transfer{};
+
+	// spi_transfer.tx_buf = (uint64_t)send;
+	// spi_transfer.rx_buf = (uint64_t)recv;
+	// spi_transfer.len = len;
+	// spi_transfer.speed_hz = _frequency;
+	// spi_transfer.bits_per_word = 8;
+
+	// result = ::ioctl(_fd, SPI_IOC_MESSAGE(1), &spi_transfer);
+
+	if (::ioctl(_fd, LW_SPI_CTL_BAUDRATE, _frequency) < 0) {
+		PX4_ERR("set spi baudrate failed");
 		return PX4_ERROR;
 	}
 
-	spi_ioc_transfer spi_transfer{};
-
-	spi_transfer.tx_buf = (uint64_t)send;
-	spi_transfer.rx_buf = (uint64_t)recv;
-	spi_transfer.len = len;
-	spi_transfer.speed_hz = _frequency;
-	spi_transfer.bits_per_word = 8;
-
-	result = ::ioctl(_fd, SPI_IOC_MESSAGE(1), &spi_transfer);
-
-	if (result != (int)len) {
-		PX4_ERR("write failed. Reported %d bytes written (%s)", result, strerror(errno));
+	if (::ioctl(_fd, LW_SPI_CTL_CS, 0) < 0) {
+		PX4_ERR("set spi cs failed");
 		return PX4_ERROR;
+	}
+
+	if (::ioctl(_fd, SPI_DEVICE_CPOL_CPHA, spi_mode_to_sylixos_mode(_mode)) < 0) {
+		PX4_ERR("set spi mode failed");
+		return PX4_ERROR;
+	}
+
+	if (send != nullptr) {
+		const int result_w = ::write(_fd, send, len);
+
+		if (result_w != (int)len) {
+			PX4_ERR("spi write failed");
+			return PX4_ERROR;
+		}
+	}
+
+	if (recv != nullptr) {
+		const int result_r = ::read(_fd, recv, len);
+
+		if (result_r != (int)len) {
+			PX4_ERR("spi read failed");
+			return PX4_ERROR;
+		}
 	}
 
 	return PX4_OK;
@@ -160,39 +216,42 @@ SPI::transferhword(uint16_t *send, uint16_t *recv, unsigned len)
 	}
 
 	// set write mode of SPI
-	int result = ::ioctl(_fd, SPI_IOC_WR_MODE, &_mode);
+	// int result = ::ioctl(_fd, SPI_IOC_WR_MODE, &_mode);
 
-	if (result == -1) {
-		PX4_ERR("can’t set spi mode");
-		return PX4_ERROR;
-	}
+	// if (result == -1) {
+	// 	PX4_ERR("can’t set spi mode");
+	// 	return PX4_ERROR;
+	// }
 
-	int bits = 16;
-	result = ::ioctl(_fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
+	// int bits = 16;
+	// result = ::ioctl(_fd, SPI_IOC_WR_BITS_PER_WORD, &bits);
 
-	if (result == -1) {
-		PX4_ERR("can’t set 16 bit spi mode");
-		return PX4_ERROR;
-	}
+	// if (result == -1) {
+	// 	PX4_ERR("can’t set 16 bit spi mode");
+	// 	return PX4_ERROR;
+	// }
 
-	spi_ioc_transfer spi_transfer[1] {};
+	// spi_ioc_transfer spi_transfer[1] {};
 
-	spi_transfer[0].tx_buf = (uint64_t)send;
-	spi_transfer[0].rx_buf = (uint64_t)recv;
-	spi_transfer[0].len = len * 2;
-	spi_transfer[0].speed_hz = _frequency;
+	// spi_transfer[0].tx_buf = (uint64_t)send;
+	// spi_transfer[0].rx_buf = (uint64_t)recv;
+	// spi_transfer[0].len = len * 2;
+	// spi_transfer[0].speed_hz = _frequency;
 	//spi_transfer[0].bits_per_word = 8;
 	//spi_transfer[0].delay_usecs = 10;
-	spi_transfer[0].cs_change = true;
+	// spi_transfer[0].cs_change = true;
 
-	result = ::ioctl(_fd, SPI_IOC_MESSAGE(1), &spi_transfer);
+	// result = ::ioctl(_fd, SPI_IOC_MESSAGE(1), &spi_transfer);
 
-	if (result != (int)(len * 2)) {
-		PX4_ERR("write failed. Reported %d bytes written (%s)", result, strerror(errno));
-		return PX4_ERROR;
-	}
+	// if (result != (int)(len * 2)) {
+	// 	PX4_ERR("write failed. Reported %d bytes written (%s)", result, strerror(errno));
+	// 	return PX4_ERROR;
+	// }
 
-	return PX4_OK;
+	// return PX4_OK;
+
+	return transfer(reinterpret_cast<uint8_t *>(send), reinterpret_cast<uint8_t *>(recv),
+			len * sizeof(uint16_t));
 }
 
 } // namespace device

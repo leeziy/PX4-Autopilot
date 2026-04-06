@@ -38,7 +38,7 @@ export PATH=/c/ACOINFO/RealEvo/compiler/aarch64-sylixos-toolchain/bin:$PATH
 export PATH=/c/ACOINFO/RealEvo/compiler/aarch64-sylixos-toolchain/aarch64-sylixos-elf/bin:$PATH
 
 git clone https://github.com/leeziy/PX4-Autopilot --recursive
-git checkout ROC-RK3588S-PC-SylixOS
+git checkout ROC-RK3588S-PC-SylixOS-ECS
 
 make clean
 make distclean

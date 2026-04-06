@@ -193,11 +193,11 @@ function(px4_add_common_flags)
 	include_directories(
 
 		#SylixOS
-		/c/Users/Leeziy/eclipse-workspace/RK3588S
-		/c/Users/Leeziy/eclipse-workspace/RK3588S/libsylixos/SylixOS
-		/c/Users/Leeziy/eclipse-workspace/RK3588S/libsylixos/SylixOS/include
-		/c/Users/Leeziy/eclipse-workspace/RK3588S/libsylixos/SylixOS/include/network
-		/c/Users/Leeziy/eclipse-workspace/RK3588S/libcextern/libcextern/include
+		/c/Users/Leeziy/eclipse-workspace/ECS_Base
+		/c/Users/Leeziy/eclipse-workspace/ECS_Base/libsylixos/SylixOS
+		/c/Users/Leeziy/eclipse-workspace/ECS_Base/libsylixos/SylixOS/include
+		/c/Users/Leeziy/eclipse-workspace/ECS_Base/libsylixos/SylixOS/include/network
+		/c/Users/Leeziy/eclipse-workspace/ECS_Base/libcextern/libcextern/include
 		/c/ACOINFO/RealEvo/compiler/aarch64-sylixos-toolchain/aarch64-sylixos-elf/include
 		/c/ACOINFO/RealEvo/compiler/aarch64-sylixos-toolchain/lib/gcc/aarch64-sylixos-elf/10.2.1/include
 		/c/ACOINFO/RealEvo/compiler/aarch64-sylixos-toolchain/aarch64-sylixos-elf/include/c++/10.2.1

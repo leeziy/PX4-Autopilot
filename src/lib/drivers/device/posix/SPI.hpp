@@ -44,19 +44,19 @@
 
 #if defined(CONFIG_SPI)
 
-#ifdef __PX4_LINUX
+#if defined(__PX4_LINUX)
 
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
-#include <linux/types.h>
-#include <linux/spi/spidev.h>
+// #include <sys/ioctl.h>
+// #include <linux/types.h>
+// #include <linux/spi/spidev.h>
 
 enum spi_mode_e {
-	SPIDEV_MODE0 = SPI_MODE_0, /* CPOL=0 CHPHA=0 */
-	SPIDEV_MODE1 = SPI_MODE_1, /* CPOL=0 CHPHA=1 */
-	SPIDEV_MODE2 = SPI_MODE_2, /* CPOL=1 CHPHA=0 */
-	SPIDEV_MODE3 = SPI_MODE_3  /* CPOL=1 CHPHA=1 */
+	SPIDEV_MODE0 = 0, /* CPOL=0 CHPHA=0 */
+	SPIDEV_MODE1 = 1, /* CPOL=0 CHPHA=1 */
+	SPIDEV_MODE2 = 2, /* CPOL=1 CHPHA=0 */
+	SPIDEV_MODE3 = 3  /* CPOL=1 CHPHA=1 */
 };
 
 struct I2CSPIDriverConfig;
@@ -200,6 +200,6 @@ enum spi_mode_e {
 	SPIDEV_MODE2 = 2, /* CPOL=1 CHPHA=0 */
 	SPIDEV_MODE3 = 3  /* CPOL=1 CHPHA=1 */
 };
-#endif // __PX4_LINUX
+#endif // __PX4_LINUX || __SYLIXOS_KERNEL
 
 #endif // CONFIG_SPI

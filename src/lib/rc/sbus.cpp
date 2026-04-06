@@ -43,22 +43,31 @@
 #include <unistd.h>
 #include <string.h>
 
-#ifdef TIOCSSINGLEWIRE
-#include <sys/ioctl.h>
-#endif
+// #ifdef TIOCSSINGLEWIRE
+// #include <sys/ioctl.h>
+// #endif
 
 #include "sbus.h"
 #include "common_rc.h"
 #include <drivers/drv_hrt.h>
 #include <lib/mathlib/mathlib.h>
 
+#include "SylixOS.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <termios.h>
+
+#define LW_UART_CTL_CS    3
+#define LW_UART_CTL_FREQ  4
+
 using namespace time_literals;
 
 #define SBUS_DEBUG_LEVEL 	0 /* Set debug output level */
 
 #if defined(__PX4_LINUX)
-#include <sys/ioctl.h>
-#include <asm-generic/termbits.h>
+// #include <sys/ioctl.h>
+// #include <asm-generic/termbits.h>
 #else
 #include <termios.h>
 #endif
@@ -158,9 +167,11 @@ sbus_config(int sbus_fd, bool singlewire)
 
 #if defined(__PX4_LINUX)
 
-	struct termios2 tio = {};
+	// struct termios2 tio = {};
+	struct termios tio;
 
-	if (0 != ioctl(sbus_fd, TCGETS2, &tio)) {
+	// if (0 != ioctl(sbus_fd, TCGETS2, &tio)) {
+	if (0 != tcgetattr(sbus_fd, &tio)) {
 		return ret;
 	}
 
@@ -176,13 +187,18 @@ sbus_config(int sbus_fd, bool singlewire)
 	/**
 	 * use BOTHER to specify speed directly in c_[io]speed member
 	 */
-	tio.c_cflag |= (CS8 | CSTOPB | CLOCAL | PARENB | BOTHER | CREAD);
-	tio.c_ispeed = 100000;
-	tio.c_ospeed = 100000;
+	tio.c_cflag |= (CS8 | CSTOPB | CLOCAL | PARENB | CREAD);
+	// tio.c_ispeed = 100000;
+	// tio.c_ospeed = 100000;
 	tio.c_cc[VMIN] = 25;
 	tio.c_cc[VTIME] = 0;
 
-	if (0 != ioctl(sbus_fd, TCSETS2, &tio)) {
+	// if (0 != ioctl(sbus_fd, TCSETS2, &tio)) {
+	if (0 != tcsetattr(sbus_fd, TCSANOW, &tio)) {
+		return ret;
+	}
+
+	if (::ioctl(sbus_fd, SIO_BAUD_SET, 97000) < 0) {
 		return ret;
 	}
 

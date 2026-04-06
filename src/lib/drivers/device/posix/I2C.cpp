@@ -46,10 +46,19 @@
 
 #ifdef __PX4_LINUX
 
-#include <linux/i2c.h>
-#include <linux/i2c-dev.h>
+// #include <linux/i2c.h>
+// #include <linux/i2c-dev.h>
 
 #include <px4_platform_common/i2c_spi_buses.h>
+
+// #define __SYLIXOS_KERNEL
+#include "SylixOS.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define LW_I2C_SET_ADDR  3
+#define LW_I2C_CTL_FREQ  4
 
 namespace device
 {
@@ -84,7 +93,7 @@ I2C::init()
 
 	// Open the actual I2C device
 	char dev_path[16] {};
-	snprintf(dev_path, sizeof(dev_path), "/dev/i2c-%i", get_device_bus());
+	snprintf(dev_path, sizeof(dev_path), "/dev/i2cdev%i", get_device_bus());
 	_fd = ::open(dev_path, O_RDWR);
 
 	if (_fd < 0) {
@@ -135,43 +144,67 @@ I2C::transfer(const uint8_t *send, const unsigned send_len, uint8_t *recv, const
 
 	do {
 		DEVICE_DEBUG("transfer out %p/%u  in %p/%u", send, send_len, recv, recv_len);
+		ret = PX4_OK;
 
-		unsigned msgs = 0;
-		struct i2c_msg msgv[2] {};
+		// unsigned msgs = 0;
+		// struct i2c_msg msgv[2] {};
 
-		if (send_len > 0) {
-			msgv[msgs].addr = get_device_address();
-			msgv[msgs].flags = 0;
-			msgv[msgs].buf = const_cast<uint8_t *>(send);
-			msgv[msgs].len = send_len;
-			msgs++;
+		// if (send_len > 0) {
+		// 	msgv[msgs].addr = get_device_address();
+		// 	msgv[msgs].flags = 0;
+		// 	msgv[msgs].buf = const_cast<uint8_t *>(send);
+		// 	msgv[msgs].len = send_len;
+		// 	msgs++;
+		// }
+
+		// if (recv_len > 0) {
+		// 	msgv[msgs].addr = get_device_address();
+		// 	msgv[msgs].flags = I2C_M_RD;
+		// 	msgv[msgs].buf = recv;
+		// 	msgv[msgs].len = recv_len;
+		// 	msgs++;
+		// }
+
+		// if (msgs == 0) {
+		// 	return -EINVAL;
+		// }
+
+		// i2c_rdwr_ioctl_data packets{};
+		// packets.msgs  = msgv;
+		// packets.nmsgs = msgs;
+
+		if (::ioctl(_fd, LW_I2C_CTL_FREQ, 400000) < 0) {
+			PX4_ERR("set i2c frequency failed");
+			ret = PX4_ERROR;
+		}
+		if (::ioctl(_fd, LW_I2C_SET_ADDR, get_device_address()) < 0) {
+			PX4_ERR("set i2c address failed");
+			ret = PX4_ERROR;
 		}
 
 		if (recv_len > 0) {
-			msgv[msgs].addr = get_device_address();
-			msgv[msgs].flags = I2C_M_RD;
-			msgv[msgs].buf = recv;
-			msgv[msgs].len = recv_len;
-			msgs++;
+			if (::read(_fd, recv, recv_len) < 0) {
+				PX4_ERR("i2c read failed");
+				ret = PX4_ERROR;
+			}
 		}
 
-		if (msgs == 0) {
-			return -EINVAL;
+		if (send_len > 0) {
+			if (::write(_fd, send, send_len) < 0) {
+				PX4_ERR("i2c write failed");
+				ret = PX4_ERROR;
+			}
 		}
 
-		i2c_rdwr_ioctl_data packets{};
-		packets.msgs  = msgv;
-		packets.nmsgs = msgs;
+		// int ret_ioctl = ::ioctl(_fd, I2C_RDWR, (unsigned long)&packets);
 
-		int ret_ioctl = ::ioctl(_fd, I2C_RDWR, (unsigned long)&packets);
-
-		if (ret_ioctl == -1) {
+		if (ret == PX4_ERROR) {
 			DEVICE_DEBUG("I2C transfer failed");
-			ret = PX4_ERROR;
+			// ret = PX4_ERROR;
 
-		} else {
+		} else if (ret == PX4_OK) {
 			// success
-			ret = PX4_OK;
+			// ret = PX4_OK;
 			break;
 		}
 
