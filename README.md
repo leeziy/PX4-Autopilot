@@ -37,6 +37,13 @@ export PATH=/c/Users/Leeziy/.conda/envs/PX4:$PATH
 export PATH=/c/ACOINFO/RealEvo/compiler/aarch64-sylixos-toolchain/bin:$PATH
 export PATH=/c/ACOINFO/RealEvo/compiler/aarch64-sylixos-toolchain/aarch64-sylixos-elf/bin:$PATH
 
+ECS_Base/libsylixos/SylixOS/posix/include/px_gjbext.h
+//line 187-190
+//LW_API int          register_driver(dev_t                   major,
+//                                    struct file_operations *driver_table,
+//                                    dev_t                  *registered_major);
+//LW_API OS_STATUS    unregister_driver(dev_t  major);
+
 git clone https://github.com/leeziy/PX4-Autopilot --recursive
 git checkout ROC-RK3588S-PC-SylixOS-ECS
 
