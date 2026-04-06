@@ -37,8 +37,8 @@ endif()
 
 target_link_directories(px4
 	PRIVATE
-	/c/Users/Leeziy/eclipse-workspace/RK3588S/libsylixos/Debug
-	/c/Users/Leeziy/eclipse-workspace/RK3588S/libcextern/Debug
+	/c/Users/Leeziy/eclipse-workspace/ECS_Base/libsylixos/Debug
+	/c/Users/Leeziy/eclipse-workspace/ECS_Base/libcextern/Debug
 )
 
 target_link_libraries(px4
