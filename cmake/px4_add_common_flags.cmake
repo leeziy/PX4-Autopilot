@@ -65,30 +65,47 @@ function(px4_add_common_flags)
 		-fvisibility=hidden
 		-include visibility.h
 
-		# Warnings
-		-Wall
-		-Wextra
-		-Werror
+		# # Warnings
+		# -Wall
+		# -Wextra
+		# -Werror
 
-		-Warray-bounds
-		-Wcast-align
-		-Wdisabled-optimization
-		-Wdouble-promotion
-		-Wfatal-errors
-		-Wfloat-equal
-		-Wformat-security
-		-Winit-self
-		-Wlogical-op
-		-Wpointer-arith
-		-Wshadow
-		-Wuninitialized
-		-Wunknown-pragmas
-		-Wunused-variable
+		# -Warray-bounds
+		# -Wcast-align
+		# -Wdisabled-optimization
+		# -Wdouble-promotion
+		# -Wfatal-errors
+		# -Wfloat-equal
+		# -Wformat-security
+		# -Winit-self
+		# -Wlogical-op
+		# -Wpointer-arith
+		# -Wshadow
+		# -Wuninitialized
+		# -Wunknown-pragmas
+		# -Wunused-variable
 
-		# disabled warnings
+		# # disabled warnings
 		-Wno-missing-field-initializers
-		-Wno-missing-include-dirs # TODO: fix and enable
+		# -Wno-missing-include-dirs # TODO: fix and enable
 		-Wno-unused-parameter
+
+		#SylixOS
+		-mcpu=generic
+		-fno-omit-frame-pointer
+		-mstrict-align
+		-ffixed-x18
+		-O0
+		-g3
+		-gdwarf-2
+		-Wall
+		-fmessage-length=0
+		-fsigned-char
+		-fno-short-enums
+		-fPIC
+		-MMD
+		-MP
+		-MF
 
 		)
 
@@ -145,7 +162,7 @@ function(px4_add_common_flags)
 		-fno-common
 
 		-Wnested-externs
-		-Wstrict-prototypes
+		-Wno-strict-prototypes
 	)
 	foreach(flag ${c_flags})
 		add_compile_options($<$<COMPILE_LANGUAGE:C>:${flag}>)
@@ -163,6 +180,7 @@ function(px4_add_common_flags)
 
 	if((NOT CMAKE_BUILD_TYPE STREQUAL FuzzTesting) AND (NOT PX4_CONFIG MATCHES "px4_sitl"))
 		list(APPEND cxx_flags
+			-fno-exceptions
 			-fno-rtti
 		)
 	endif()
@@ -173,6 +191,18 @@ function(px4_add_common_flags)
 
 
 	include_directories(
+
+		#SylixOS
+		/c/Users/Leeziy/eclipse-workspace/RK3588S
+		/c/Users/Leeziy/eclipse-workspace/RK3588S/libsylixos/SylixOS
+		/c/Users/Leeziy/eclipse-workspace/RK3588S/libsylixos/SylixOS/include
+		/c/Users/Leeziy/eclipse-workspace/RK3588S/libsylixos/SylixOS/include/network
+		/c/Users/Leeziy/eclipse-workspace/RK3588S/libcextern/libcextern/include
+		/c/ACOINFO/RealEvo/compiler/aarch64-sylixos-toolchain/aarch64-sylixos-elf/include
+		/c/ACOINFO/RealEvo/compiler/aarch64-sylixos-toolchain/lib/gcc/aarch64-sylixos-elf/10.2.1/include
+		/c/ACOINFO/RealEvo/compiler/aarch64-sylixos-toolchain/aarch64-sylixos-elf/include/c++/10.2.1
+		/c/ACOINFO/RealEvo/compiler/aarch64-sylixos-toolchain/aarch64-sylixos-elf/include/c++/10.2.1/aarch64-sylixos-elf
+
 		${PX4_BINARY_DIR}
 		${PX4_BINARY_DIR}/src/lib
 
@@ -193,8 +223,9 @@ function(px4_add_common_flags)
 
 	add_definitions(
 		-DCONFIG_ARCH_BOARD_${PX4_BOARD_NAME}
-		-D__CUSTOM_FILE_IO__
+		# -D__CUSTOM_FILE_IO__
 		-D__STDC_FORMAT_MACROS
+		-DSYLIXOS
 		)
 
 endfunction()

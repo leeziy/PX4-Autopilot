@@ -92,7 +92,7 @@ __BEGIN_DECLS
 	} while(0)
 
 #define warn(...) 		PX4_WARN(__VA_ARGS__)
-#define warnx(...) 		PX4_WARN(__VA_ARGS__)
+// #define warnx(...) 		PX4_WARN(__VA_ARGS__)
 
 __END_DECLS
 

@@ -44,7 +44,7 @@ elseif((${PX4_PLATFORM} MATCHES "qurt"))
 	list(APPEND SRCS_PLATFORM qurt/I2C.cpp)
 	list(APPEND SRCS_PLATFORM qurt/SPI.cpp)
 	list(APPEND SRCS_PLATFORM qurt/uart.c)
-elseif(UNIX AND NOT APPLE) #TODO: add linux PX4 platform type
+else(NOT APPLE) #TODO: add linux PX4 platform type
 	# Linux I2Cdev and SPIdev
 	list(APPEND SRCS_PLATFORM
 		posix/I2C.cpp
@@ -56,6 +56,10 @@ px4_add_library(drivers__device
 	CDev.cpp
 	${SRCS_PLATFORM}
 	)
+
+target_compile_definitions(drivers__device PRIVATE
+	-D__SYLIXOS_KERNEL
+)
 
 # px4_spibus_initialize (stm32_spibus_initialize)
 if (${PX4_PLATFORM} STREQUAL "nuttx")

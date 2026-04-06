@@ -849,8 +849,9 @@ void Mavlink::find_broadcast_address()
 #else
 	// On Linux, we can determine the required size of the
 	// buffer first by providing NULL to ifc_req.
-	ifconf.ifc_req = nullptr;
-	ifconf.ifc_len = 0;
+	// ifconf.ifc_req = nullptr;
+	ifconf.ifc_len = 1024;
+	ifconf.ifc_req = (struct ifreq *)(new uint8_t[ifconf.ifc_len]);
 
 	ret = ioctl(_socket_fd, SIOCGIFCONF, &ifconf);
 
@@ -864,7 +865,7 @@ void Mavlink::find_broadcast_address()
 	PX4_DEBUG("need to allocate %d bytes", ifconf.ifc_len);
 
 	// Allocate buffer.
-	ifconf.ifc_req = (struct ifreq *)(new uint8_t[ifconf.ifc_len]);
+	// ifconf.ifc_req = (struct ifreq *)(new uint8_t[ifconf.ifc_len]);
 
 	if (ifconf.ifc_req == nullptr) {
 		PX4_ERR("Could not allocate ifconf buffer");

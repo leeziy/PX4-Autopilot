@@ -139,7 +139,7 @@ int PCA9685::updateRAW(const uint16_t *outputs, unsigned int num_outputs)
 
 int PCA9685::setAllPWM(uint16_t output)
 {
-	uint16_t val = (uint16_t)roundl((output * currentFreq * PCA9685_PWM_RES / (float)1e6));
+	uint16_t val = (uint16_t)round((output * currentFreq * PCA9685_PWM_RES / (float)1e6));
 	uint8_t buf[] = {
 		PCA9685_REG_ALLLED_ON_L,
 		0x00, 0x00,

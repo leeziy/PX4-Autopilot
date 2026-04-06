@@ -4,6 +4,7 @@ import argparse
 import json
 import lzma #to create .xz file
 import re
+import os
 
 parser = argparse.ArgumentParser(description="""Generate the COMPONENT_GENERAL json file""")
 parser.add_argument('filename', metavar='component_general.json', help='JSON output file')
@@ -55,11 +56,19 @@ def crc_update(buf, crc_table, crc):
 
 crc_table = create_table()
 
+def msys2_to_windows(msys2_path: str) -> str:
+    match = re.match(r'^/([a-zA-Z])/(.*)', msys2_path)
+    if match:
+        drive = match.group(1).upper() + ':\\'
+        path = match.group(2).replace('/', '\\')
+        return os.path.join(drive, path)
+    return msys2_path
+
 metadata_types = []
 for metadata_type_tuple in args.type:
     type_id, metadata_file, uri, fallback_uri, translation_uri = metadata_type_tuple.split(',')
     file_crc = 0
-    for line in open(metadata_file, "rb"):
+    for line in open(msys2_to_windows(metadata_file), "rb"):
         file_crc = crc_update(line, crc_table, file_crc)
     json_type = {
             'type': int(type_id),
