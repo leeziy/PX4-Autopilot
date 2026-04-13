@@ -148,7 +148,7 @@ crsf_config(int uart_fd)
 
 	/* no parity, one stop bit */
 	tcgetattr(uart_fd, &t);
-	cfsetspeed(&t, CRSF_BAUDRATE);
+	// cfsetspeed(&t, CRSF_BAUDRATE);
 	t.c_cflag &= ~(CSTOPB | PARENB);
 	return tcsetattr(uart_fd, TCSANOW, &t);
 }
