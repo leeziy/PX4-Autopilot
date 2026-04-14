@@ -90,6 +90,7 @@ int
 I2C::init()
 {
 	int ret = PX4_ERROR;
+	uint8_t I2C_EMPTY = 0x00;
 
 	// Open the actual I2C device
 	char dev_path[16] {};
@@ -103,6 +104,9 @@ I2C::init()
 	}
 
 	// call the probe function to check whether the device is present
+	::write(_fd, &I2C_EMPTY, 1);
+	::read(_fd, &I2C_EMPTY, 1);
+	ret = probe();
 	ret = probe();
 
 	if (ret != OK) {
@@ -173,20 +177,15 @@ I2C::transfer(const uint8_t *send, const unsigned send_len, uint8_t *recv, const
 		// packets.msgs  = msgv;
 		// packets.nmsgs = msgs;
 
-		if (::ioctl(_fd, LW_I2C_CTL_FREQ, 400000) < 0) {
+		// int ret_ioctl = ::ioctl(_fd, I2C_RDWR, (unsigned long)&packets);
+
+		if (::ioctl(_fd, LW_I2C_CTL_FREQ, 250000) < 0) {
 			PX4_ERR("set i2c frequency failed");
 			ret = PX4_ERROR;
 		}
 		if (::ioctl(_fd, LW_I2C_SET_ADDR, get_device_address()) < 0) {
 			PX4_ERR("set i2c address failed");
 			ret = PX4_ERROR;
-		}
-
-		if (recv_len > 0) {
-			if (::read(_fd, recv, recv_len) < 0) {
-				PX4_ERR("i2c read failed");
-				ret = PX4_ERROR;
-			}
 		}
 
 		if (send_len > 0) {
@@ -196,7 +195,12 @@ I2C::transfer(const uint8_t *send, const unsigned send_len, uint8_t *recv, const
 			}
 		}
 
-		// int ret_ioctl = ::ioctl(_fd, I2C_RDWR, (unsigned long)&packets);
+		if (recv_len > 0) {
+			if (::read(_fd, recv, recv_len) < 0) {
+				PX4_ERR("i2c read failed");
+				ret = PX4_ERROR;
+			}
+		}
 
 		if (ret == PX4_ERROR) {
 			DEVICE_DEBUG("I2C transfer failed");
