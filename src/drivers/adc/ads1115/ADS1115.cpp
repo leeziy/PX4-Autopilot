@@ -55,7 +55,8 @@ int ADS1115::init()
 
 	setChannel(ADS1115::A0);  // prepare for the first measure.
 
-	ScheduleOnInterval(SAMPLE_INTERVAL / 4, SAMPLE_INTERVAL / 4);
+	// ScheduleOnInterval(SAMPLE_INTERVAL / 4, SAMPLE_INTERVAL / 4);
+	ScheduleOnInterval(SAMPLE_INTERVAL, 0);
 
 	return PX4_OK;
 }

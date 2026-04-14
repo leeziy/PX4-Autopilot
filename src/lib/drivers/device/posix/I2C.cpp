@@ -59,6 +59,7 @@
 
 #define LW_I2C_SET_ADDR  3
 #define LW_I2C_CTL_FREQ  4
+#define LW_I2C_WRRD_OPT  0x2000
 
 namespace device
 {
@@ -141,6 +142,13 @@ I2C::transfer(const uint8_t *send, const unsigned send_len, uint8_t *recv, const
 	int ret = PX4_ERROR;
 	unsigned retry_count = 0;
 
+	typedef struct rk_i2c_wrrd_opt {
+	uint8_t  *pucWrBuf;
+	uint16_t  usWrLen;
+	uint8_t  *pucRdBuf;
+	uint16_t  usRdLen;
+	} rk_i2c_wrrd_opt_t;
+
 	if (_fd < 0) {
 		PX4_ERR("I2C device not opened");
 		return PX4_ERROR;
@@ -179,31 +187,33 @@ I2C::transfer(const uint8_t *send, const unsigned send_len, uint8_t *recv, const
 
 		// int ret_ioctl = ::ioctl(_fd, I2C_RDWR, (unsigned long)&packets);
 
-		if (::ioctl(_fd, LW_I2C_CTL_FREQ, 250000) < 0) {
+		if (::ioctl(_fd, LW_I2C_CTL_FREQ, 400000) < 0) {
 			PX4_ERR("set i2c frequency failed");
-			ret = PX4_ERROR;
+			// ret = PX4_ERROR;
 		}
 		if (::ioctl(_fd, LW_I2C_SET_ADDR, get_device_address()) < 0) {
 			PX4_ERR("set i2c address failed");
-			ret = PX4_ERROR;
+			// ret = PX4_ERROR;
 		}
 
-		if (send_len > 0) {
-			if (::write(_fd, send, send_len) < 0) {
-				PX4_ERR("i2c write failed");
-				ret = PX4_ERROR;
-			}
-		}
+		rk_i2c_wrrd_opt_t msg;
 
-		if (recv_len > 0) {
-			if (::read(_fd, recv, recv_len) < 0) {
-				PX4_ERR("i2c read failed");
-				ret = PX4_ERROR;
+		msg.pucWrBuf = (uint8_t*)send;
+		msg.usWrLen = send_len;
+		msg.pucRdBuf = (uint8_t*)recv;
+		msg.usRdLen = recv_len;
+
+		if (::ioctl(_fd, LW_I2C_WRRD_OPT, &msg) < 0) {
+			PX4_ERR("i2c transfer failed");
+			for (unsigned i = 0; i < send_len; i++) {
+				PX4_ERR("send[%u]=0x%02x", i, (unsigned)send[i]);
 			}
+
+			// ret = PX4_ERROR;
 		}
 
 		if (ret == PX4_ERROR) {
-			DEVICE_DEBUG("I2C transfer failed");
+			// DEVICE_DEBUG("I2C transfer failed");
 			// ret = PX4_ERROR;
 
 		} else if (ret == PX4_OK) {

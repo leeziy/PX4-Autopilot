@@ -351,7 +351,7 @@ ICP201XX::read_reg(Register reg, uint8_t *buf, uint8_t len)
 {
 	int ret;
 	ret = transfer((uint8_t *)&reg, 1, buf, len);
-	dummy_reg();
+	// dummy_reg();
 	return ret;
 }
 
@@ -367,7 +367,7 @@ ICP201XX::write_reg(Register reg, uint8_t val)
 	uint8_t data[2] = { (uint8_t)reg, val };
 	int ret;
 	ret = transfer(data, sizeof(data), nullptr, 0);
-	dummy_reg();
+	// dummy_reg();
 	return ret;
 }
 
