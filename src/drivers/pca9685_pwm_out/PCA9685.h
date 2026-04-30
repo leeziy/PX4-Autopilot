@@ -80,7 +80,7 @@
 #define PCA9685_PRE_SCALE_MASK 0xFF
 
 // common sense
-#define PCA9685_PWM_CHANNEL_COUNT 6
+#define PCA9685_PWM_CHANNEL_COUNT 4
 #define PCA9685_PWM_RES 4096
 
 namespace drv_pca9685_pwm

@@ -187,22 +187,12 @@ SPI::transfer(uint8_t *send, uint8_t *recv, unsigned len)
 		return PX4_ERROR;
 	}
 
-	if (send != nullptr) {
-		const int result_w = ::write(_fd, send, len);
+	int result_w = ::write(_fd, send, len);
+	int result_r = ::read(_fd, recv, len);
 
-		if (result_w != (int)len) {
-			PX4_ERR("spi write failed");
-			return PX4_ERROR;
-		}
-	}
-
-	if (recv != nullptr) {
-		const int result_r = ::read(_fd, recv, len);
-
-		if (result_r != (int)len) {
-			PX4_ERR("spi read failed");
-			return PX4_ERROR;
-		}
+	if ((result_w < 0)||(result_r < 0)) {
+		PX4_ERR("spi transfer failed");
+		return PX4_ERROR;
 	}
 
 	return PX4_OK;
