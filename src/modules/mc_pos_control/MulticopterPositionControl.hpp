@@ -75,6 +75,14 @@ public:
 	MulticopterPositionControl(bool vtol = false);
 	~MulticopterPositionControl() override;
 
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	void request_stop() override
+	{
+		ModuleBase<MulticopterPositionControl>::request_stop();
+		ScheduleForStop();
+	}
+#endif
+
 	/** @see ModuleBase */
 	static int task_spawn(int argc, char *argv[]);
 

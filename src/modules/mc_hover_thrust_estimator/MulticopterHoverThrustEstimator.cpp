@@ -50,10 +50,16 @@ MulticopterHoverThrustEstimator::MulticopterHoverThrustEstimator() :
 	_valid_hysteresis.set_hysteresis_time_from(false, 2_s);
 	updateParams();
 	reset();
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	RegisterManualTrigger(px4::TriggerTarget::HoverThrustEstimator, 0);
+#endif
 }
 
 MulticopterHoverThrustEstimator::~MulticopterHoverThrustEstimator()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	perf_free(_cycle_perf);
 }
 
@@ -103,7 +109,9 @@ void MulticopterHoverThrustEstimator::Run()
 		exit_and_cleanup();
 		return;
 	}
+
 	syscall(SYS_kill, 0x11111310, 0);
+
 	if (_vehicle_land_detected_sub.updated()) {
 		vehicle_land_detected_s vehicle_land_detected;
 

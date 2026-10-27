@@ -53,10 +53,16 @@ MulticopterPositionControl::MulticopterPositionControl(bool vtol) :
 	parameters_update(true);
 	_tilt_limit_slew_rate.setSlewRate(.2f);
 	_takeoff_status_pub.advertise();
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	RegisterManualTrigger(px4::TriggerTarget::PositionControl, 0);
+#endif
 }
 
 MulticopterPositionControl::~MulticopterPositionControl()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	perf_free(_cycle_perf);
 }
 
@@ -340,6 +346,7 @@ void MulticopterPositionControl::Run()
 		exit_and_cleanup();
 		return;
 	}
+
 	syscall(SYS_kill, 0x11111350, 0);
 	// reschedule backup
 	ScheduleDelayed(100_ms);

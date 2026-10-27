@@ -87,10 +87,17 @@ Sensors::Sensors(bool hil_enabled) :
 	parameters_update();
 
 	InitializeVehicleIMU();
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	RegisterManualTrigger(px4::TriggerTarget::Sensors, 0);
+#endif
 }
 
 Sensors::~Sensors()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
+
 	// clear all registered callbacks
 	for (auto &sub : _vehicle_imu_sub) {
 		sub.unregisterCallback();
@@ -528,6 +535,7 @@ void Sensors::Run()
 		exit_and_cleanup();
 		return;
 	}
+
 	syscall(SYS_kill, 0x11111290, 0);
 	perf_begin(_loop_perf);
 

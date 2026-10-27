@@ -1,0 +1,6 @@
+menuconfig MODULES_TRIGGER_BRIDGE
+	bool "trigger_bridge"
+	default n
+	depends on PLATFORM_POSIX
+	---help---
+		Receive UDP SET_MODE and TRIGGER commands for selected WorkItems.

@@ -74,6 +74,11 @@ public:
 	void ScheduleClear();
 
 protected:
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	void CancelAutomaticSchedule() override;
+	void ResumeAutomaticSchedule() override;
+	void WaitForAutomaticSchedule() override;
+#endif
 
 	ScheduledWorkItem(const char *name, const wq_config_t &config) : WorkItem(name, config) {}
 	virtual ~ScheduledWorkItem() override;
@@ -87,6 +92,12 @@ private:
 	static void	schedule_trampoline(void *arg);
 
 	hrt_call	_call{};
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	enum class ScheduleKind { None, Delayed, Interval, At };
+	ScheduleKind _requested_schedule{ScheduleKind::None};
+	hrt_abstime _requested_time{0};
+	uint32_t _requested_interval{0};
+#endif
 };
 
 } // namespace px4

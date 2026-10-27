@@ -60,13 +60,18 @@ WorkItem::WorkItem(const char *name, const WorkItem &work_item) :
 	}
 }
 
+#if !defined(CONFIG_MODULES_TRIGGER_BRIDGE)
 WorkItem::~WorkItem()
 {
 	Deinit();
 }
+#endif
 
 bool WorkItem::Init(const wq_config_t &config)
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	ManualTriggerLock lock;
+#endif
 	// clear any existing first
 	Deinit();
 
@@ -84,6 +89,10 @@ bool WorkItem::Init(const wq_config_t &config)
 
 void WorkItem::Deinit()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	ManualTriggerLock lock;
+#endif
+
 	// remove any currently queued work
 	if (_wq != nullptr) {
 		// prevent additional insertions
@@ -99,6 +108,10 @@ void WorkItem::Deinit()
 
 void WorkItem::ScheduleClear()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	ManualTriggerLock lock;
+#endif
+
 	if (_wq != nullptr) {
 		_wq->Remove(this);
 	}

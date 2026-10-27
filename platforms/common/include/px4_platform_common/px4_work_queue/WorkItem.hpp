@@ -35,6 +35,9 @@
 
 #include "WorkQueueManager.hpp"
 #include "WorkQueue.hpp"
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+#include "ManualTrigger.hpp"
+#endif
 
 #include <containers/IntrusiveQueue.hpp>
 #include <containers/IntrusiveSortedList.hpp>
@@ -63,12 +66,22 @@ public:
 	// WorkItems sorted by name
 	bool operator<=(const WorkItem &rhs) const { return (strcmp(ItemName(), rhs.ItemName()) <= 0); }
 
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	void ScheduleNow();
+
+	// Used only by the UDP bridge. No request cache or extra job queue.
+	static TriggerResult TriggerCommand(uint32_t target, uint16_t instance, bool set_mode, TriggerMode mode);
+
+	// Bypass automatic-release gating exclusively for module shutdown.
+	void ScheduleForStop();
+#else
 	inline void ScheduleNow()
 	{
 		if (_wq != nullptr) {
 			_wq->Add(this);
 		}
 	}
+#endif
 
 	virtual void print_run_status();
 
@@ -79,11 +92,26 @@ public:
 	 * @param config The WorkQueue configuration (see WorkQueueManager.hpp).
 	 * @return true if initialization was successful
 	 */
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	bool ChangeWorkQueue(const wq_config_t &config);
+#else
 	bool ChangeWorkQueue(const wq_config_t &config) { return Init(config); }
+#endif
 
 	const char *ItemName() const { return _item_name; }
 
 protected:
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	// Call at the end of the derived constructor, before starting callbacks.
+	void RegisterManualTrigger(TriggerTarget target, uint16_t instance = 0);
+	// Call before derived members are destroyed / a sensor's Stop() detaches it.
+	void UnregisterManualTrigger();
+	// Caller holds ManualTriggerLock when combining this with a timer operation.
+	bool AutomaticSchedulingAllowed() const;
+	virtual void CancelAutomaticSchedule() {}
+	virtual void ResumeAutomaticSchedule() {}
+	virtual void WaitForAutomaticSchedule() {}
+#endif
 
 	explicit WorkItem(const char *name, const wq_config_t &config);
 
@@ -109,6 +137,10 @@ protected:
 	}
 
 	friend void WorkQueue::Run();
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	TriggerRunTicket BeginTriggerRun();
+	static void EndTriggerRun(const TriggerRunTicket &ticket);
+#endif
 	virtual void Run() = 0;
 
 	/**
@@ -133,6 +165,9 @@ protected:
 private:
 
 	WorkQueue	*_wq{nullptr};
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	int _trigger_slot {-1};
+#endif
 
 };
 

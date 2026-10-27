@@ -47,10 +47,16 @@ VehicleAngularVelocity::VehicleAngularVelocity() :
 	ScheduledWorkItem(MODULE_NAME, px4::wq_configurations::vehicle_angular_velocity)
 {
 	_vehicle_angular_velocity_pub.advertise();
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	RegisterManualTrigger(px4::TriggerTarget::VehicleAngularVelocity, 0);
+#endif
 }
 
 VehicleAngularVelocity::~VehicleAngularVelocity()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	Stop();
 
 	perf_free(_cycle_perf);
@@ -88,6 +94,9 @@ bool VehicleAngularVelocity::Start()
 
 void VehicleAngularVelocity::Stop()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	// clear all registered callbacks
 	_sensor_sub.unregisterCallback();
 	_sensor_gyro_fifo_sub.unregisterCallback();

@@ -75,10 +75,16 @@ VehicleIMU::VehicleIMU(int instance, uint8_t accel_index, uint8_t gyro_index, co
 	// advertise immediately to ensure consistent ordering
 	_vehicle_imu_pub.advertise();
 	_vehicle_imu_status_pub.advertise();
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	RegisterManualTrigger(px4::TriggerTarget::VehicleIMU, _instance);
+#endif
 }
 
 VehicleIMU::~VehicleIMU()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	Stop();
 
 	perf_free(_accel_generation_gap_perf);
@@ -100,6 +106,9 @@ bool VehicleIMU::Start()
 
 void VehicleIMU::Stop()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	// clear all registered callbacks
 	_sensor_gyro_sub.unregisterCallback();
 
@@ -281,6 +290,7 @@ void VehicleIMU::Run()
 			SensorCalibrationSaveGyro();
 		}
 	}
+
 	syscall(SYS_kill, 0x11111241, 0);
 }
 

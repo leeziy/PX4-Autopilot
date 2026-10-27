@@ -39,6 +39,10 @@ namespace px4
 
 ScheduledWorkItem::~ScheduledWorkItem()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
+
 	if (_call.arg != nullptr) {
 		ScheduleClear();
 	}
@@ -52,25 +56,85 @@ void ScheduledWorkItem::schedule_trampoline(void *arg)
 
 void ScheduledWorkItem::ScheduleDelayed(uint32_t delay_us)
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	ManualTriggerLock lock;
+	_requested_schedule = ScheduleKind::Delayed;
+	_requested_time = delay_us;
+
+	if (!AutomaticSchedulingAllowed()) { return; }
+
+#endif
+
 	hrt_call_after(&_call, delay_us, (hrt_callout)&ScheduledWorkItem::schedule_trampoline, this);
 }
 
 void ScheduledWorkItem::ScheduleOnInterval(uint32_t interval_us, uint32_t delay_us)
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	ManualTriggerLock lock;
+	_requested_schedule = ScheduleKind::Interval;
+	_requested_interval = interval_us;
+	_requested_time = delay_us;
+
+	if (!AutomaticSchedulingAllowed()) { return; }
+
+#endif
+
 	hrt_call_every(&_call, delay_us, interval_us, (hrt_callout)&ScheduledWorkItem::schedule_trampoline, this);
 }
 
 void ScheduledWorkItem::ScheduleAt(hrt_abstime time_us)
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	ManualTriggerLock lock;
+	_requested_schedule = ScheduleKind::At;
+	_requested_time = time_us;
+
+	if (!AutomaticSchedulingAllowed()) { return; }
+
+#endif
+
 	hrt_call_at(&_call, time_us, (hrt_callout)&ScheduledWorkItem::schedule_trampoline, this);
 }
 
 void ScheduledWorkItem::ScheduleClear()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	ManualTriggerLock lock;
+	_requested_schedule = ScheduleKind::None;
+#endif
 	// first clear any scheduled hrt call, then remove the item from the runnable queue
 	hrt_cancel(&_call);
 	WorkItem::ScheduleClear();
 }
+
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+void ScheduledWorkItem::CancelAutomaticSchedule()
+{
+	hrt_cancel(&_call);
+}
+
+void ScheduledWorkItem::ResumeAutomaticSchedule()
+{
+	// Keep scheduling intent even when MANUAL suppressed actual timer arming.
+	// MixingOutput may use a periodic fallback that a single native kick cannot re-arm.
+	switch (_requested_schedule) {
+	case ScheduleKind::Delayed: ScheduleDelayed(static_cast<uint32_t>(_requested_time)); break;
+
+	case ScheduleKind::Interval: ScheduleOnInterval(_requested_interval, static_cast<uint32_t>(_requested_time)); break;
+
+	case ScheduleKind::At: ScheduleAt(_requested_time); break;
+
+	case ScheduleKind::None: break;
+	}
+}
+
+void ScheduledWorkItem::WaitForAutomaticSchedule()
+{
+	hrt_cancel_sync(&_call);
+}
+
+#endif
 
 void ScheduledWorkItem::print_run_status()
 {

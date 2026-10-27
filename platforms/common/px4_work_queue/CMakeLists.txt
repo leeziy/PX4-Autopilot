@@ -39,6 +39,10 @@ px4_add_library(px4_work_queue
 	WorkQueueManager.cpp
 )
 
+if(CONFIG_MODULES_TRIGGER_BRIDGE)
+	target_sources(px4_work_queue PRIVATE ManualTrigger.cpp)
+endif()
+
 if(PX4_TESTING)
 	add_subdirectory(test)
 endif()

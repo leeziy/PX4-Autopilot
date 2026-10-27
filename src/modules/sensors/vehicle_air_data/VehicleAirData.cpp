@@ -54,10 +54,16 @@ VehicleAirData::VehicleAirData() :
 	_vehicle_air_data_pub.advertise();
 
 	_voter.set_timeout(SENSOR_TIMEOUT);
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	RegisterManualTrigger(px4::TriggerTarget::VehicleAirData, 0);
+#endif
 }
 
 VehicleAirData::~VehicleAirData()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	Stop();
 	perf_free(_cycle_perf);
 }
@@ -70,6 +76,9 @@ bool VehicleAirData::Start()
 
 void VehicleAirData::Stop()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	Deinit();
 
 	// clear all registered callbacks

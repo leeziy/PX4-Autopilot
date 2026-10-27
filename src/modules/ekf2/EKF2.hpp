@@ -143,7 +143,11 @@ public:
 
 	bool should_exit() const { return _task_should_exit.load(); }
 
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	void request_stop() { _task_should_exit.store(true); ScheduleForStop(); }
+#else
 	void request_stop() { _task_should_exit.store(true); }
+#endif
 
 	static void lock_module() { pthread_mutex_lock(&ekf2_module_mutex); }
 	static bool trylock_module() { return (pthread_mutex_trylock(&ekf2_module_mutex) == 0); }

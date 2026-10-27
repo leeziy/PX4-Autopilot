@@ -225,6 +225,12 @@ __EXPORT extern bool	hrt_called(struct hrt_call *entry);
  */
 __EXPORT extern void	hrt_cancel(struct hrt_call *entry);
 
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+/** Cancel and wait for an already-dispatched POSIX callout. Do not hold locks
+ * needed by that callout. Its owner must prevent concurrent re-arming. */
+__EXPORT extern void hrt_cancel_sync(struct hrt_call *entry);
+#endif
+
 /**
  * Initialise a hrt_call structure
  */

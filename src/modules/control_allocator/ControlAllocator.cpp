@@ -74,10 +74,17 @@ ControlAllocator::ControlAllocator() :
 	}
 
 	parameters_updated();
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	RegisterManualTrigger(px4::TriggerTarget::ControlAllocator, 0);
+#endif
 }
 
 ControlAllocator::~ControlAllocator()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
+
 	for (int i = 0; i < ActuatorEffectiveness::MAX_NUM_MATRICES; ++i) {
 		delete _control_allocation[i];
 	}
@@ -308,6 +315,7 @@ ControlAllocator::Run()
 		exit_and_cleanup();
 		return;
 	}
+
 	syscall(SYS_kill, 0x11111370, 0);
 	perf_begin(_loop_perf);
 

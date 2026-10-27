@@ -171,6 +171,50 @@ void WorkQueue::Clear()
 	work_unlock();
 }
 
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+void WorkQueue::Run()
+{
+	while (!should_exit()) {
+		// loop as the wait may be interrupted by a signal
+		do {} while (px4_sem_wait(&_process_lock) != 0);
+
+		// Never take the trigger lock while holding a queue lock.
+		for (;;) {
+			WorkItem *work = nullptr;
+			TriggerRunTicket ticket;
+			{
+				ManualTriggerLock trigger_lock;
+				work_lock();
+				work = _q.pop();
+
+				if (work) {
+					ticket = work->BeginTriggerRun();
+					work->RunPreamble();
+				}
+
+#if defined(ENABLE_LOCKSTEP_SCHEDULER)
+
+				if (!work && _lockstep_component != -1) {
+					px4_lockstep_unregister_component(_lockstep_component);
+					_lockstep_component = -1;
+				}
+
+#endif // ENABLE_LOCKSTEP_SCHEDULER
+				work_unlock();
+			}
+
+			if (!work) { break; }
+
+			work->Run();
+			// Run() may delete the object. Only the independent registry ticket is used.
+			WorkItem::EndTriggerRun(ticket);
+		}
+	}
+
+	PX4_DEBUG("%s: exiting", _config.name);
+}
+
+#else
 void WorkQueue::Run()
 {
 	while (!should_exit()) {
@@ -204,6 +248,8 @@ void WorkQueue::Run()
 
 	PX4_DEBUG("%s: exiting", _config.name);
 }
+
+#endif
 
 void WorkQueue::print_status(bool last)
 {

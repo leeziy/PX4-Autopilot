@@ -65,10 +65,16 @@ MulticopterAttitudeControl::MulticopterAttitudeControl(bool vtol) :
 	_manual_throttle_minimum.setSlewRate(0.05f);
 	// Rate of change 50% per second -> 2 seconds to ramp to 100%
 	_manual_throttle_maximum.setSlewRate(0.5f);
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	RegisterManualTrigger(px4::TriggerTarget::AttitudeControl, 0);
+#endif
 }
 
 MulticopterAttitudeControl::~MulticopterAttitudeControl()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	perf_free(_loop_perf);
 }
 
@@ -205,6 +211,7 @@ MulticopterAttitudeControl::Run()
 		exit_and_cleanup();
 		return;
 	}
+
 	syscall(SYS_kill, 0x11111340, 0);
 	perf_begin(_loop_perf);
 

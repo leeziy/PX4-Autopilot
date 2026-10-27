@@ -50,10 +50,16 @@ PWMSim::PWMSim(bool hil_mode_enabled) :
 	_mixing_output.setAllMaxValues(PWM_SIM_PWM_MAX_MAGIC);
 
 	_mixing_output.setIgnoreLockdown(hil_mode_enabled);
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	RegisterManualTrigger(px4::TriggerTarget::PWMSim, 0);
+#endif
 }
 
 PWMSim::~PWMSim()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	perf_free(_cycle_perf);
 	perf_free(_interval_perf);
 }
@@ -109,6 +115,7 @@ void PWMSim::Run()
 		exit_and_cleanup();
 		return;
 	}
+
 	syscall(SYS_kill, 0x11111380, 0);
 	_mixing_output.update();
 

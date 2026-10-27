@@ -54,10 +54,16 @@ MulticopterRateControl::MulticopterRateControl(bool vtol) :
 
 	parameters_updated();
 	_controller_status_pub.advertise();
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	RegisterManualTrigger(px4::TriggerTarget::RateControl, 0);
+#endif
 }
 
 MulticopterRateControl::~MulticopterRateControl()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	perf_free(_loop_perf);
 }
 
@@ -108,6 +114,7 @@ MulticopterRateControl::Run()
 		exit_and_cleanup();
 		return;
 	}
+
 	syscall(SYS_kill, 0x11111330, 0);
 	perf_begin(_loop_perf);
 

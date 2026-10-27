@@ -1,0 +1,192 @@
+{
+  "reference_branch": "ROC-RK3588S-PC",
+  "reference_commit": "2f629949b0727ee7e80e43d69dc6a979f378444a",
+  "tick_hz": 1000,
+  "profiles": {
+    "real": {
+      "description": "Source-derived initial trigger rates; actual native Run rates require tracing. Reference branch parameter defaults; real hardware PWM is not a manual target.",
+      "tasks": [
+        {
+          "target": "vehicle_magnetometer",
+          "instance": 0,
+          "rate_hz": 20,
+          "phase_ticks": 0,
+          "basis": "BMM150 real driver 50 ms; HITL initial assumption"
+        },
+        {
+          "target": "vehicle_air_data",
+          "instance": 0,
+          "rate_hz": 30,
+          "phase_ticks": 0,
+          "basis": "ICP201XX real driver 1_s/30; HITL initial assumption"
+        },
+        {
+          "target": "vehicle_imu",
+          "instance": 0,
+          "rate_hz": 400,
+          "phase_ticks": 0,
+          "basis": "IMU_INTEG_RATE; nominal integration/output rate, not proven Run rate"
+        },
+        {
+          "target": "vehicle_acceleration",
+          "instance": 0,
+          "rate_hz": 400,
+          "phase_ticks": 0,
+          "basis": "IMU_INTEG_RATE-based required updates"
+        },
+        {
+          "target": "vehicle_angular_velocity",
+          "instance": 0,
+          "rate_hz": 400,
+          "phase_ticks": 0,
+          "basis": "IMU_GYRO_RATEMAX; nominal publication target"
+        },
+        {
+          "target": "sensors",
+          "instance": 0,
+          "rate_hz": 400,
+          "phase_ticks": 0,
+          "basis": "vehicle_imu callback, single-EKF voting path"
+        },
+        {
+          "target": "ekf2",
+          "instance": 0,
+          "rate_hz": 400,
+          "phase_ticks": 0,
+          "basis": "sensor_combined callback; Run follows IMU, not EKF2_PREDICT_US"
+        },
+        {
+          "target": "mc_pos_control",
+          "instance": 0,
+          "rate_hz": 100,
+          "phase_ticks": 0,
+          "basis": "vehicle_local_position callback; nominal EKF predict output"
+        },
+        {
+          "target": "mc_hover_thrust_estimator",
+          "instance": 0,
+          "rate_hz": 100,
+          "phase_ticks": 0,
+          "basis": "vehicle_local_position callback; follows local-position output"
+        },
+        {
+          "target": "mc_att_control",
+          "instance": 0,
+          "rate_hz": 200,
+          "phase_ticks": 0,
+          "basis": "vehicle_attitude callback; EKF output predictor follows IMU"
+        },
+        {
+          "target": "mc_rate_control",
+          "instance": 0,
+          "rate_hz": 400,
+          "phase_ticks": 0,
+          "basis": "vehicle_angular_velocity callback"
+        },
+        {
+          "target": "control_allocator",
+          "instance": 0,
+          "rate_hz": 400,
+          "phase_ticks": 0,
+          "basis": "torque/thrust callback; nominal gyro-rate chain"
+        }
+      ]
+    },
+    "hitl": {
+      "description": "Source-derived initial trigger rates; actual native Run rates require tracing. Firefly HITL.config overrides IMU_INTEG_RATE=1000 and EKF2_PREDICT_US=1000.",
+      "tasks": [
+        {
+          "target": "vehicle_magnetometer",
+          "instance": 0,
+          "rate_hz": 20,
+          "phase_ticks": 0,
+          "basis": "BMM150 real driver 50 ms; HITL initial assumption"
+        },
+        {
+          "target": "vehicle_air_data",
+          "instance": 0,
+          "rate_hz": 30,
+          "phase_ticks": 0,
+          "basis": "ICP201XX real driver 1_s/30; HITL initial assumption"
+        },
+        {
+          "target": "vehicle_imu",
+          "instance": 0,
+          "rate_hz": 400,
+          "phase_ticks": 0,
+          "basis": "IMU_INTEG_RATE; nominal integration/output rate, not proven Run rate"
+        },
+        {
+          "target": "vehicle_acceleration",
+          "instance": 0,
+          "rate_hz": 400,
+          "phase_ticks": 0,
+          "basis": "IMU_INTEG_RATE-based required updates"
+        },
+        {
+          "target": "vehicle_angular_velocity",
+          "instance": 0,
+          "rate_hz": 400,
+          "phase_ticks": 0,
+          "basis": "IMU_GYRO_RATEMAX; nominal publication target"
+        },
+        {
+          "target": "sensors",
+          "instance": 0,
+          "rate_hz": 400,
+          "phase_ticks": 0,
+          "basis": "vehicle_imu callback, single-EKF voting path"
+        },
+        {
+          "target": "ekf2",
+          "instance": 0,
+          "rate_hz": 400,
+          "phase_ticks": 0,
+          "basis": "sensor_combined callback; Run follows IMU, not EKF2_PREDICT_US"
+        },
+        {
+          "target": "mc_pos_control",
+          "instance": 0,
+          "rate_hz": 100,
+          "phase_ticks": 0,
+          "basis": "vehicle_local_position callback; nominal EKF predict output"
+        },
+        {
+          "target": "mc_hover_thrust_estimator",
+          "instance": 0,
+          "rate_hz": 100,
+          "phase_ticks": 0,
+          "basis": "vehicle_local_position callback; follows local-position output"
+        },
+        {
+          "target": "mc_att_control",
+          "instance": 0,
+          "rate_hz": 200,
+          "phase_ticks": 0,
+          "basis": "vehicle_attitude callback; EKF output predictor follows IMU"
+        },
+        {
+          "target": "mc_rate_control",
+          "instance": 0,
+          "rate_hz": 400,
+          "phase_ticks": 0,
+          "basis": "vehicle_angular_velocity callback"
+        },
+        {
+          "target": "control_allocator",
+          "instance": 0,
+          "rate_hz": 400,
+          "phase_ticks": 0,
+          "basis": "torque/thrust callback; nominal gyro-rate chain"
+        },
+        {
+          "target": "pwm_out_sim",
+          "instance": 0,
+          "rate_hz": 400,
+          "phase_ticks": 0,
+          "basis": "actuator callback; gyro-rate chain, not 250 Hz fallback"
+        }
+      ]
+    }
+  }
+}

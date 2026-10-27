@@ -70,10 +70,17 @@ VehicleMagnetometer::VehicleMagnetometer() :
 			}
 		}
 	}
+
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	RegisterManualTrigger(px4::TriggerTarget::VehicleMagnetometer, 0);
+#endif
 }
 
 VehicleMagnetometer::~VehicleMagnetometer()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	Stop();
 	perf_free(_cycle_perf);
 }
@@ -86,6 +93,9 @@ bool VehicleMagnetometer::Start()
 
 void VehicleMagnetometer::Stop()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	Deinit();
 
 	// clear all registered callbacks

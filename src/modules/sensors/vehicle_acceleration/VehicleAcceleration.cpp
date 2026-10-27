@@ -49,10 +49,16 @@ VehicleAcceleration::VehicleAcceleration() :
 	_vehicle_acceleration_pub.advertise();
 
 	CheckAndUpdateFilters();
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	RegisterManualTrigger(px4::TriggerTarget::VehicleAcceleration, 0);
+#endif
 }
 
 VehicleAcceleration::~VehicleAcceleration()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	Stop();
 }
 
@@ -76,6 +82,9 @@ bool VehicleAcceleration::Start()
 
 void VehicleAcceleration::Stop()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	// clear all registered callbacks
 	_sensor_sub.unregisterCallback();
 	_sensor_selection_sub.unregisterCallback();
@@ -267,6 +276,7 @@ void VehicleAcceleration::Run()
 			}
 		}
 	}
+
 	syscall(SYS_kill, 0x11111261, 0);
 }
 

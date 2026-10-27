@@ -49,6 +49,9 @@
 #include <time.h>
 #include <string.h>
 #include <errno.h>
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+#include <pthread.h>
+#endif
 #include "hrt_work.h"
 
 // Voxl2 board specific API definitions to get time offset
@@ -69,6 +72,11 @@ static constexpr unsigned HRT_INTERVAL_MAX = 50000000;
  * Queue of callout entries.
  */
 static struct sq_queue_s	callout_queue;
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+// Protected by the HRT lock, including post-callback periodic re-insertion.
+static hrt_call *active_call{nullptr};
+static pthread_t active_call_thread{};
+#endif
 
 /* latency baseline (last compare value applied) */
 static uint64_t			latency_baseline;
@@ -176,6 +184,24 @@ void	hrt_cancel(struct hrt_call *entry)
 	hrt_unlock();
 	// endif
 }
+
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+void hrt_cancel_sync(struct hrt_call *entry)
+{
+	hrt_cancel(entry);
+
+	for (;;) {
+		hrt_lock();
+		const bool active = active_call == entry;
+		const bool same_thread = active && pthread_equal(active_call_thread, pthread_self());
+		hrt_unlock();
+
+		if (!active || same_thread) { return; }
+
+		px4_usleep(1000);
+	}
+}
+#endif
 
 static void hrt_latency_update()
 {
@@ -440,6 +466,10 @@ hrt_call_invoke()
 
 		/* invoke the callout (if there is one) */
 		if (call->callout) {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+			active_call = call;
+			active_call_thread = pthread_self();
+#endif
 			// Unlock so we don't deadlock in callback
 			hrt_unlock();
 
@@ -461,6 +491,10 @@ hrt_call_invoke()
 
 			hrt_call_enter(call);
 		}
+
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+		active_call = nullptr;
+#endif
 	}
 
 	hrt_unlock();

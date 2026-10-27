@@ -226,10 +226,21 @@ EKF2::EKF2(bool multi_mode, const px4::wq_config_t &config, bool replay_mode):
 	_estimator_states_pub.advertise();
 	_estimator_status_flags_pub.advertise();
 	_estimator_status_pub.advertise();
+
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+
+	if (!_multi_mode) {
+		RegisterManualTrigger(px4::TriggerTarget::EKF2, 0);
+	}
+
+#endif
 }
 
 EKF2::~EKF2()
 {
+#if defined(CONFIG_MODULES_TRIGGER_BRIDGE)
+	UnregisterManualTrigger();
+#endif
 	perf_free(_ekf_update_perf);
 	perf_free(_msg_missed_imu_perf);
 }
@@ -408,7 +419,9 @@ void EKF2::Run()
 
 		return;
 	}
+
 	syscall(SYS_kill, 0x11111300, 0);
+
 	// check for parameter updates
 	if (_parameter_update_sub.updated() || !_callback_registered) {
 		// clear update
